@@ -1,0 +1,316 @@
+/*
+ * Elizabeth Wright
+ * Pronoun testing project
+ * Started: May 5 2021
+ * Finished: May 15, 2021
+ */
+
+import java.util.*;
+public class PronounTester {
+
+//	Pronouns are, in order: subject, object, possessive determiner, possessive pronoun, reflexive
+	static String[] heHimPronouns = {"he", "him", "his", "his", "himself"};
+	static String[] sheHerPronouns = {"she", "her", "her", "hers", "herself"};
+	static String[] theyThemPronouns = {"they", "them", "their", "theirs", "themself"};
+	static String[] neoPronouns = new String [5];
+	
+	public static void main(String[] args) {
+		boolean done = false;
+		String exit = " ", singOrPlu = " ";
+		int choice;
+		String[] name = new String[2];
+		Scanner input = new Scanner(System.in);
+		
+		intro();
+		
+		while (done == false) {
+			 
+			name = nameSelect();
+			
+			System.out.println("\nHello " + name[0] + " " + name[1] + "!");
+			
+			choice = pronounSelect();
+			
+			if (choice == 7) {
+				pronounEnter();
+			}
+			
+			singOrPlu = plural();
+			
+			if (singOrPlu.equalsIgnoreCase("sing")) {
+				story(name, choice);
+			} else if (singOrPlu.equalsIgnoreCase("plu")) {
+				storyPlural(name, choice);
+			}
+			
+			System.out.print("\nDo you want to exit Pronoun Tester? (yes/no)");
+			exit = input.next();
+			if (exit.equalsIgnoreCase("yes")) {
+				done = true;
+			}
+		}
+		
+		System.out.print("Goodbye!");
+		
+	}
+	
+	public static void intro() {
+		System.out.println("Hello! This is a pronoun testing program," 
+				+ "\nwhere you can test new pronouns/names to see how they feel. (press enter to continue)");
+		enterCode();
+		
+		System.out.println("After entering your name and choosing your pronouns, a story will show up using your name and pronouns.");
+		enterCode();
+		
+		System.out.println("Please follow the instructions given. After you are presented your story, " 
+				+ "\nyou will be given the option to exit the program.");
+		enterCode();
+		
+		System.out.print("Happy testing!");
+		enterCode();
+	}
+	public static String[] nameSelect() {
+		Scanner input1 = new Scanner(System.in);
+		String[] name = new String[2];
+		System.out.println("-------------------------------------------------------" 	
+				+ "------------------------------------------------------------------------");
+		
+		System.out.print("\nWhat's your first name? ");
+		name[0] = input1.next();
+		
+		System.out.print("What's your last name (surname)? ");
+		name[1] = input1.next();
+		
+		return(name);
+	}
+	public static int pronounSelect() {
+		Scanner input2 = new Scanner(System.in);
+		int choice = 0;
+		
+		System.out.println("Enter the number next to the pronouns you want to test.");
+		System.out.print("[1] she/her\n[2] he/him\n[3] they/them\n[4] he/they\n[5] she/they\n[6] he/her\n[7] other\nCHOICE: ");
+		choice = input2.nextInt();
+		
+		return(choice);
+	}
+	public static void pronounEnter() {
+		Scanner input3 = new Scanner(System.in);
+		
+		System.out.print("Note: please enter pronouns in ALL lowercase! Press Enter to continue.");
+		enterCode();
+		
+		System.out.print("Enter the subject of your pronouns (ex. he, she): ");
+		neoPronouns[0] = input3.next().toLowerCase();
+		
+		System.out.print("Enter the object of your pronouns (ex. him, her): ");
+		neoPronouns[1] = input3.next().toLowerCase();
+		
+		System.out.print("Enter the possessive determiner of your pronouns (ex. his, her): ");
+		neoPronouns[2] = input3.next().toLowerCase();
+		
+		System.out.print("Enter the possessive pronoun of your pronouns (his, hers): ");
+		neoPronouns[3] = input3.next().toLowerCase();
+		
+		System.out.print("Enter the reflexive of your pronouns (ex. himself, herself): ");
+		neoPronouns[4] = input3.next().toLowerCase();
+		
+	}
+	public static String plural() {
+		boolean cont = false;
+		String singOrPlu = " ";
+		Scanner input4 = new Scanner(System.in);
+		
+		do {
+			System.out.print("\nSingular (sing) or plural (plu)? ");
+			singOrPlu = input4.next();
+			
+			if (singOrPlu.equalsIgnoreCase("sing") || singOrPlu.equalsIgnoreCase("plu")) {
+				cont = true;
+			}
+		
+		} while (cont == false);
+		
+		return(singOrPlu);
+		
+	}
+	public static void story(String[] name, int choice) {
+		int pronoun = 0;
+		boolean capital = false, plural = false;
+		
+		System.out.println("-------------------------------------------------------" 	
+				+ "------------------------------------------------------------------------" 
+				+ "\nTHE STORY");
+		
+		System.out.print("\nHello! Today I met a person who goes by " + name[0] + " " + name[1] + ". ");
+		
+		pronoun = 0;
+		capital = true;
+		System.out.print(pronounInserts(choice, pronoun, capital, plural));
+		capital = false;
+		
+		System.out.print(" has a wonderful personality. \nThat smile of ");
+		
+		pronoun = 3;
+		System.out.print(pronounInserts(choice, pronoun, capital, plural));
+		
+		System.out.print(" really makes me happy. \nI could talk to ");
+		
+		pronoun = 1;
+		System.out.print(pronounInserts(choice, pronoun, capital, plural));
+		
+		System.out.print(" all day, although ");
+		
+		pronoun = 0;
+		System.out.print(pronounInserts(choice, pronoun, capital, plural));
+		
+		System.out.print(" doesn't talk about ");
+		
+		pronoun = 4;
+		System.out.print(pronounInserts(choice, pronoun, capital, plural));
+		
+		System.out.print(" much. \nI wonder if ");
+		
+		pronoun = 2;
+		System.out.print(pronounInserts(choice, pronoun, capital, plural));
+		
+		System.out.println(" day has been wonderful. I hope so!");
+		
+		System.out.println("-------------------------------------------------------" 	
+				+ "------------------------------------------------------------------------");
+	}
+	public static void storyPlural(String[] name, int choice) {
+		int pronoun = 0;
+		boolean capital = false, plural = true;
+		
+		System.out.println("-------------------------------------------------------" 	
+				+ "------------------------------------------------------------------------" 
+				+ "\nTHE STORY");
+		
+		System.out.print("\nHello! Today I met a person who goes by " + name[0] + " " + name[1] + ". ");
+		
+		pronoun = 0;
+		capital = true;
+		System.out.print(pronounInserts(choice, pronoun, capital, plural));
+		capital = false;
+		
+		System.out.print(" have a wonderful personality. \nThat smile of ");
+		
+		pronoun = 3;
+		System.out.print(pronounInserts(choice, pronoun, capital, plural));
+		
+		System.out.print(" really makes me happy. \nI could talk to ");
+		
+		pronoun = 1;
+		System.out.print(pronounInserts(choice, pronoun, capital, plural));
+		
+		System.out.print(" all day, although ");
+		
+		pronoun = 0;
+		System.out.print(pronounInserts(choice, pronoun, capital, plural));
+		
+		System.out.print(" don't talk about ");
+		
+		plural = true;
+		pronoun = 4;
+		System.out.print(pronounInserts(choice, pronoun, capital, plural));
+		
+		System.out.print(" much. \nI wonder if ");
+		
+		pronoun = 2;
+		System.out.print(pronounInserts(choice, pronoun, capital, plural));
+		
+		System.out.println(" day has been wonderful. I hope so!");
+		
+		System.out.println("-------------------------------------------------------" 	
+				+ "------------------------------------------------------------------------");
+	}
+	public static String pronounInserts(int choice, int pronounNum, boolean capital, boolean plural) {
+		String pronoun = " ";
+		int num = 0;
+		
+		if (choice == 1) { //she/her
+			pronoun = sheHerPronouns[pronounNum];
+		} else if (choice == 2) { //he/him
+			pronoun = heHimPronouns[pronounNum];
+		} else if (choice == 3) { //they/them
+			pronoun = theyThemPronouns[pronounNum];
+		} else if (choice == 4) { //he/they
+			num = randomizer();
+			
+			if (num == 0) {
+				pronoun = heHimPronouns[pronounNum];
+			} else if (num == 1) {
+				pronoun = theyThemPronouns[pronounNum];
+			}
+			
+		} else if (choice == 5) { //she/they
+			num = randomizer();
+			
+			if (num == 0) {
+				pronoun = sheHerPronouns[pronounNum];
+			} else if (num == 1) {
+				pronoun = theyThemPronouns[pronounNum];
+			}
+			
+		} else if (choice == 6) { //he/her
+			num = randomizer();
+			
+			if (num == 0) {
+				pronoun = sheHerPronouns[pronounNum];
+			} else if (num == 1) {
+				pronoun = heHimPronouns[pronounNum];
+			}
+			
+		} else if (choice == 7) { //other
+			pronoun = neoPronouns[pronounNum];
+		}
+		
+		if (capital == true) {
+			pronoun = capitalize(pronoun);
+		}
+		
+		if (pronounNum == 4 && plural == true) {
+			pronoun = pluralize(pronoun);
+		}
+		
+		return(pronoun);
+		
+	}
+	public static int randomizer() {
+		int num;
+		Random rand = new Random();
+		
+		num = rand.nextInt(2);
+		
+		return(num);
+		
+	}
+	public static String capitalize(String pronoun) {
+		String firstLetter = pronoun.substring(0,1);
+		
+		firstLetter = firstLetter.toUpperCase();
+		
+		pronoun = firstLetter + pronoun.substring(1);
+		
+		return(pronoun);
+		
+	}
+	public static String pluralize(String pronoun) {
+		
+		pronoun = pronoun.replaceAll("self", "selves");
+		return (pronoun);
+	}
+	public static void enterCode() {
+		String next = "g";
+		Boolean cont = false;
+		Scanner input5 = new Scanner(System.in);
+		
+		do {
+			next = input5.nextLine();
+			if (next.isEmpty()) {
+				cont = true;
+			}
+		} while (cont == false);
+	}
+	
+}

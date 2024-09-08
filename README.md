@@ -7,6 +7,8 @@ A Java version of the fantasy game found at Niagara Great Wolf Lodge. Users need
 
 To do this, they need to go on quests to get four Runes that give them special powers; the Portal Rune, the Freeze Rune, the Ice Arrow Rune, and the Protection Rune. To do so, they have to find various artifacts in the Artifact Hall. They can also get powerups in the form of toppers from the shop.
 
+This project includes the use of of arrays (1D, 2D), OOD (including arrays of objects), recursion, searching/sorting algorithms, inheritance/polymorphism, data strutcures, and files.
+
 Here is a list of classes found in this project:
 - ICS4U_FP (main/quest stones) --> main hub for all code; gives player quests, allows them to pick where to go, see quest progress, etc
 - Password --> used files to allow user to login to the game/have multiple saved games on one computer
@@ -31,5 +33,6 @@ Here is a list of classes found in this project:
     - Equipment --> extension of Inventory to track quantity and quality of equipment
     - Supplies --> extention of Inventory to track quantities of supplies
     - inventoryClient --> client management of supplies and equipment   
+- pronounTester, MAY 2021 --> simple program that puts the pronouns and name of a user's choice into a story
 - mastermind, JANUARY 2021 --> text-based mastermind game, using letters instead of colors
 - roman_numeral_conversion, DECEMBER 2020 --> converts roman numerals to base 10, then to other bases
