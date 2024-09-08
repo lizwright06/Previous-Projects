@@ -1,0 +1,472 @@
+/*
+ * Student: Elizabeth Wright
+ * Date Started: January 12, 2021
+ * Date Finished: January 25, 2021
+ * Description: Game of Mastermind
+ */
+
+import java.util.*;
+public class ICS3U_FP {
+
+	public static void main(String[] args) {
+		int count = 0;
+		String alone, play;
+		boolean guess = false, solved = false, continuePlay = true, verified = false;
+		Scanner input3 = new Scanner(System.in);
+		
+		System.out.println("MASTERMIND");
+		
+		while (continuePlay == true) {
+			//Resetting variables
+			count = 0;
+			solved = false;
+			verified = false;
+			
+			themeAndRulesPrint();
+			codesPrint();
+			
+			//1- or 2-player game choice
+			do {
+				System.out.println("\nAre you playing alone or with a friend? alone for alone, friend for with a friend");
+				alone = input3.next();
+				
+				if (alone.equalsIgnoreCase("alone") || alone.equalsIgnoreCase("friend")) {
+					verified = true;
+				}
+			} while (verified = false);
+			
+			
+			String[] baseCode = new String[4];
+			verified = false;
+			
+			//Code generation or enter, based on previous answer
+			if (alone.equalsIgnoreCase("alone")) {
+				baseCode = baseCodeRand();
+			} else if (alone.equalsIgnoreCase("friend")) {
+				do {
+					baseCode = baseCodeFriend();
+					verified = onlyCodes(baseCode);
+				} while (verified == false);	
+				
+				//Making sure the guesser can't see the code
+				for (int i = 0; i<25; i++ ) {
+					System.out.println("\n");
+				}
+				
+				System.out.println("Whoever is guessing can look now!");
+			}
+			
+			//Creating the other arrays
+			String[] guesses = new String[40];
+			String[] currentGuess = new String[4];
+			int[] RCRP = new int[10];
+			int[] RCWP = new int[10];
+			
+			//Giving the guesses elements a value so a null error isn't tiggered
+			for(int i = 0; i<40; i++) {
+				guesses[i] = "a";
+			}
+			/*
+			for(int i = 0; i<4; i++) {
+				System.out.print(baseCode[i] + " ");
+			}
+			*/
+			
+			//Game code
+			while (solved == false && count < 10) {
+				//User options
+				while (guess == false) {
+					System.out.println("\nATTEMPT " + (count+1));
+					int choice = choices();
+					if (choice == 1) {
+						//Getting the user's guess and making sure it's valid
+						codesPrint();
+						currentGuess = guess();
+						guess = onlyCodes(currentGuess);
+					} else if (choice == 2) {
+						//Showing the user their past guesses and score
+						pastGuessAndScore(guesses, RCRP, RCWP);
+					} else if (choice == 3) {
+						//Printing the codes
+						codesPrint();
+					}
+				}
+				
+				//Counting the RCRP after a guess
+				boolean[] RCRPCount = scoringRCRP(baseCode, currentGuess);
+				for(int i = 0; i<4; i++) {
+					if (RCRPCount[i] == true) {
+						RCRP[count] += 1;
+					}
+				}
+				
+				//RCWP counting after a guess
+				RCWP[count] = scoringRCWP(baseCode, currentGuess, RCRPCount);
+					
+				//Showing the user their RCRP and RCWP 
+				System.out.println("Right Color Right Place: " + RCRP[count] + " \nRight Color Wrong Place: " + RCWP[count]);
+				
+				//Saving the guesses into the array
+				for(int i=0; i<4; i++) {
+					int element = count*4+i;
+					guesses[element] = currentGuess[i];
+				}
+				
+				//Checking if the user solved the code
+				if (RCRP[count] == 4) {
+					solvedAndFarewell(count);
+					solved = true;
+					count = 11;
+				} else if (count == 9) {
+					//If they don't guess the code in time, show them the code and their guesses
+					notSolvedFarewell(baseCode);
+					System.out.println("\nYour guesses were: ");
+					pastGuessAndScore(guesses, RCRP, RCWP);
+					count = 10;
+				}
+				
+				//Resetting/adding to variables
+				guess = false;
+				count++;
+			}
+			
+			verified = false;
+			do {
+				//Asking user if they want to play again
+				System.out.println("\nDo you want to play again? y/n");
+				play = input3.next();
+				
+				if (play.equalsIgnoreCase("y") || play.equalsIgnoreCase("n")) {
+					verified = true;
+				}
+			} while (verified == false);
+			
+			if (play.equalsIgnoreCase("y")) {
+				continuePlay = true;
+			} else if (play.equalsIgnoreCase("n")) {
+				continuePlay = false;
+			}
+			
+		}
+		
+	}
+	
+	
+	public static boolean onlyCodes(String[] currentGuess) {
+		boolean guess = true;
+		
+		//Making sure the guess is valid
+		for (int i = 0; i<4; i++) {
+			if (currentGuess[i].equalsIgnoreCase("R") || currentGuess[i].equalsIgnoreCase("G") 
+					|| currentGuess[i].equalsIgnoreCase("W") || currentGuess[i].equalsIgnoreCase("B") 
+					|| currentGuess[i].equalsIgnoreCase("Y") || currentGuess[i].equalsIgnoreCase("P")) {
+				
+			} else {
+				guess = false;
+			}
+		}
+		
+		//Telling the user if they need to re-enter their guess
+		if (guess == false) {
+			System.out.println("Please make sure all of your selections are valid.");
+		}
+		
+		return(guess);
+	}
+	
+	
+	public static void notSolvedFarewell(String [] baseCode) {
+		//Message if the user does not solve the code
+		System.out.println("Oh no! You didn't get the code! You're captured, and the nukes will be launched in 6 hours.");
+		System.out.print("The code was: ");
+		for(int i = 0; i<4; i++) {
+			System.out.print(baseCode[i] + " ");
+		}
+	}
+	
+	
+	public static void solvedAndFarewell(int count) {
+		//Message if the user solves the code
+		System.out.println("\nAfter " + (count+1) + " tries, you got the code!\nThe transmission was sucessfully sent out to your team, and the nukes were stopped! Good job!");
+	}
+	
+ 	public static String[] guess() {
+		String[] guess = new String[4];
+		Scanner input1 = new Scanner(System.in);
+		
+		//Taking the user's guess input
+		System.out.print("Your guess, separated by spaces: ");
+		guess[0] = input1.next().toUpperCase();
+		guess[1] = input1.next().toUpperCase();
+		guess[2] = input1.next().toUpperCase();
+		guess[3] = input1.next().toUpperCase();
+		
+		return(guess);
+	}
+	
+ 	
+ 	public static void pastGuessAndScore(String[] guesses, int[] RCRP, int[] RCWP) {
+		for (int i = 0; i<10; i++) {
+			int check = i*4;
+			
+			//Printing the guesses and scores until the element is 'a' (not saved yet)
+			if (guesses[check].equals("a")) {
+				i = 10;
+			} else {
+				for(int a = 0; a<4; a++) {
+					int element = i*4+a;
+					System.out.print(guesses[element] + " ");
+				}
+				
+				System.out.println("\tRight Color... Right Place: " + RCRP[i] + " Wrong Place: " + RCWP[i]);
+			}
+		}
+	}
+	
+ 	
+ 	public static boolean[] scoringRCRP(String[] baseCode, String[] currentGuess) {
+		boolean[] RCRP = new boolean[4];
+		
+		//Checking if any of the guessed colors are in the right place
+		for(int i = 0; i<4; i++) {
+			if (currentGuess[i].equals(baseCode[i])) {
+				RCRP[i] = true;
+			}
+		}
+		
+		return(RCRP);
+	}
+	
+ 	
+ 	public static int scoringRCWP(String[] baseCode, String[] currentGuess, boolean[] RCRPCount) {
+		int RCWP = 0;
+		boolean firstDoubleFirstPass = true, secondDoubleFirstPass = true;
+		String firstDouble = "h", secondDouble = "h";
+		
+		//Isolating the doubles in the current guess
+		for(int i = 0; i<4; i++) {
+			for (int a = 0; a<4; a++) {
+				if (a == i) {
+					
+				} else if (currentGuess[a].equals(firstDouble) || currentGuess[i].equals(firstDouble)) {
+					
+				} else if (currentGuess[i].equals(currentGuess[a]) && firstDoubleFirstPass == true) {
+					firstDouble = currentGuess[i];
+					firstDoubleFirstPass = false;
+				} else if (currentGuess[i].equals(currentGuess[a]) && secondDoubleFirstPass == true) {
+					secondDouble = currentGuess[i];
+					secondDoubleFirstPass = false;
+				}
+			}
+		}
+		
+		firstDoubleFirstPass = true;
+		secondDoubleFirstPass = true;
+		
+		//Using the RCRP booleans to figure out if the RCWP should be counted
+		for (int i = 0; i<4; i++) {	
+			for (int a = 0; a<4; a++) {
+				if (RCRPCount[a] || RCRPCount[i]) {
+					
+				} else if ((baseCode[i].equals(firstDouble) && firstDoubleFirstPass == false) 
+						|| (baseCode[i].equals(secondDouble) && secondDoubleFirstPass == false)) {
+					
+				} else if (baseCode[i].equals(currentGuess[a])) {
+					RCWP++;
+					a = 5;
+					if (baseCode[i].equals(firstDouble)) {
+						firstDoubleFirstPass = false;
+						
+					} else if (baseCode[i].equals(secondDouble)) {
+						secondDoubleFirstPass = false;
+						
+					}
+					
+				}
+			}
+		}
+		
+		return(RCWP);
+	}
+	
+ 	
+ 	public static int choices() {
+		int choice;
+		Scanner input = new Scanner(System.in);
+		
+		//Choice input
+		do {
+			System.out.print("Type ‘1’ to enter your guess.\n" + 
+					"Type ‘2’ to see your previous guesses and feedback\n" + 
+					"Type ‘3’ to see the color codes\n" + 
+					"Choice: ");
+			choice = input.nextInt();
+		} while (choice > 3 || choice < 0);
+		
+		return(choice);
+	}
+	
+ 	
+ 	public static String[] baseCodeRand() {
+		String[] OGCode = new String[4];
+		Random rand = new Random();
+		
+		//Generating the base code; assigning the correct letter value
+		for(int i = 0; i<4; i++) {
+			int color = rand.nextInt(6);
+			
+			if (color == 0) {
+				OGCode[i] = "R";
+			} else if (color == 1) {
+				OGCode[i] = "Y";
+			} else if (color == 2) {
+				OGCode[i] = "P";
+			} else if (color == 3) {
+				OGCode[i] = "B";
+			} else if (color == 4) {
+				OGCode[i] = "W";
+			} else if (color == 5) {
+				OGCode[i] = "G";
+			}
+		}
+		
+		return(OGCode);
+	}
+ 	
+ 	public static String[] baseCodeFriend() {
+ 		String[] baseCode = new String[4];
+ 		Scanner input4 = new Scanner(System.in);
+ 		
+ 		//Code to enter the base code (2-player)
+ 		System.out.println("Hello! Please make sure whoever is guessing the code is not looking at the screen." 
+ 				+ "\nHit the enter key when you're ready!");
+ 		
+ 		enterCode();
+ 		
+ 		System.out.println("OK! Enter the code, in ALL CAPS, with spaces between each letter! The color codes are below.");
+ 		
+ 		codesPrint();
+ 		
+ 		baseCode[0] = input4.next().toUpperCase();
+		baseCode[1] = input4.next().toUpperCase();
+		baseCode[2] = input4.next().toUpperCase();
+		baseCode[3] = input4.next().toUpperCase();
+ 		
+ 		return(baseCode);
+ 	}
+	
+ 	
+ 	public static void themeAndRulesPrint() {
+		//Printing the theme and the rules
+ 		System.out.println("\nPress the enter key to continue reading!");
+		
+		enterCode();
+		
+		System.out.println("After months of hard work, you have successfully infiltrated the Enigma Prototypes; " 
+				+ "\na team of enhanced super-intelligent individuals bent on world destruction. ");
+		
+		enterCode();
+		
+		System.out.println("During your first meeting, you discover that the Enigma Prototypes have obtained the " 
+				+ "\nlaunch codes for all the nuclear bombs in the world, and intend to launch them " 
+				+ "\nin six hours.");
+		
+		enterCode();
+		
+		System.out.println("You need to alert your team, but when you try to communicate with them, " 
+				+ "\nyou discover that you need to enter a four-color code in order to send a transmission."); 
+		
+		enterCode();
+		
+		System.out.println("There are six color options; red, green, yellow, purple, black and white. "); 
+		
+		enterCode();
+		
+		System.out.println("You get 10 attempts, and after each attempt you will receive feedback on your guess; " 
+				+ "\nthe number of colors in the right place, and the number of colors that are in " 
+				+ "\nthe code but not in the right location."); 
+		
+		enterCode();
+		
+		System.out.println("If you don’t get the code in 10 tries, an alarm will be set off and you’ll get caught!" 
+				+ "\nThe world is in your hands. You only get one shot, so make your moves wisely!");
+		
+		enterCode();
+		
+		System.out.print("Rules:\n" + 
+				"1. You get 10 attempts to guess the right code."); 
+		
+		enterCode();
+		
+		System.out.print("2. There are 6 colors: red, green, purple, yellow and white.\n" 
+				+ "   The code can be any combination of these colors.");
+				
+		enterCode();
+		
+		System.out.print("3. Enter your guess using the color codes below.\n" 
+				+ "   These will also be provided to you when you enter your guess.");
+		
+		enterCode();
+		
+		System.out.print("4. When guessing, your letters must be separated by a space");
+		
+		enterCode();
+		
+		System.out.print("5. You will receive two values after guessing: RCRP (right color right place)\n" 
+				+ "   and RCWP (right color wrong place).");
+		
+		enterCode();
+		
+		System.out.print("6. Before entering your guess, you will be given the option to see your\n" 
+				+ "   previous guesses and feedback, as well as the color codes.");
+		
+		enterCode();
+		
+		System.out.println("7. You will be given the option to play again.\n" 
+				+ "   Each time you start a game, you will be given the option to play with a friend or play solo.");
+		
+		enterCode();
+		
+		System.out.println("If the program won't accept your code, enter any letter that is\n" 
+				+ "not a color code (may need to do this up to 3 times, separate each letter by a space)");
+		
+		enterCode();
+		
+		System.out.println("This should allow you to re-enter your code.\n"
+				+ "To avoid this issue, enter your code with spaces between each letter.");
+		
+		enterCode();
+		
+		System.out.print("Have fun!");
+		
+		enterCode();
+	}
+	
+ 	
+ 	public static void codesPrint() {
+ 		//Printing the codes
+ 		System.out.println("\nTHE CODES");
+		System.out.println("R - red\n" + 
+				"Y - yellow\n" + 
+				"P - purple\n" + 
+				"B - black\n" + 
+				"W - white\n" + 
+				"G - green");
+	}
+
+ 	
+ 	public static void enterCode() {
+		String next;
+		boolean cont = false;
+		Scanner input2 = new Scanner(System.in);
+		
+		//User needs to hit the enter key to continue
+		do {
+			next = input2.nextLine();
+			if (next.isEmpty()) {
+				cont = true;
+			}
+		} while (cont == false);
+		cont = false;
+	}
+}
