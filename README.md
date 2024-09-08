@@ -1,8 +1,8 @@
 # Previous-Projects
 Projects from August 2024 and Before
 
-# PROJECT LIST
-## Main Feature: magiQuest, JUNE 2022
+## PROJECT LIST
+### Main Feature: magiQuest, JUNE 2022
 A Java version of the fantasy game found at Niagara Great Wolf Lodge. Users need to complete the Adventure of defeating Charlock, a dragon that has been terrorizing the locals and stealing their gold.
 
 To do this, they need to go on quests to get four Runes that give them special powers; the Portal Rune, the Freeze Rune, the Ice Arrow Rune, and the Protection Rune. To do so, they have to find various artifacts in the Artifact Hall. They can also get powerups in the form of toppers from the shop.
@@ -24,8 +24,7 @@ Here is a list of classes found in this project:
     - ProtectionQueue (extends Queue) --> uses Queue to create a queue with all of the clues for artifacts in the Protection Rune quest in the right order
     - CharlockBattle (extends Queue) --> uses Queue to create a queue with all of the clues for the pre-Adventure in the final battle with Charlock. Also includes attack and HP functions for the player and Charlock.
 
-## Other Projects
-
+### Other Projects
 
 - salonSoftware, APRIL 2022 --> group project making a software for a hypothetical salon
     - Main Class --> coded by collaborator to bring everyone's parts together
