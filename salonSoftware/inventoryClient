@@ -1,0 +1,1253 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: April 8, 2022
+ * Date Finished: April 25, 2022
+ * Description: Client code for the hair salon software project
+ */
+
+package inheritanceSalonProjectStartedApr8;
+import java.util.*;
+import java.io.*;
+public class inventoryClient {
+
+	static double balance = 0;
+	
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: None
+	 * Post: program ends
+	 * Description: "main" method of inventory. Handles program input descision (file vs manual)
+	 *              choice menu, saving to file
+	 */
+	public static void inventoryMain(double bal) {
+		balance = bal;
+		boolean cont = true;
+		int suppNum, equipNum, choice;
+		File supplies = new File("supplies.txt"), equipment = new File("equipment.txt");
+		Equipment[] equip;
+		Supplies[] supply;
+		Scanner input = new Scanner(System.in);
+		
+		inventoryIntro();
+		
+		if (equipment.exists()) {
+			//pulls information from file if it exists
+			equip = defaultInputEquipment(equipment);
+			equipNum = equip.length;
+		} else {
+			System.out.println("\nEQUIPMENT INPUT");
+			
+			//asks user for number of pieces of equipment if the file doesn't exist
+			System.out.println("How many pieces of equipment do you have?");
+			System.out.println("Note: this means the TOTAL number of EVERYTHING combined\n(ex. if you have 4 chairs, you have 4 peices of equipment).");
+			System.out.print("Enter your number: ");
+			equipNum = input.nextInt();
+			equip = firstInputEquipment(equipNum);
+			
+			//creates equipment file
+			try {
+				equipment.createNewFile();
+			} catch (IOException e) {
+				//IOException catcher
+				System.out.println("There was a problem creating the file.");
+				System.out.println("IOException: " + e.getMessage());
+			}
+			
+			//saves file
+			equipment = equipFileWrite(equip, equipment, equipNum);
+		}
+		
+		if (supplies.exists()) {
+			//pulls information from file if it exists
+			supply = defaultInputSupplies(supplies);
+			suppNum = supply.length;
+		} else {
+			System.out.println("\nSUPPLY INPUT");
+			
+			//asks user for number of supplies if the file doesn't exist
+			System.out.println("How many kinds of supplies do you have?");
+			System.out.println("Note: this means how many different types (ex. if you have\n4 of the same shampoo and 2 of the same conditioner, enter 2)");
+			System.out.print("Enter your number:");
+			suppNum = input.nextInt();
+			
+			//supply input
+			supply = firstInputSupplies(suppNum);
+			
+			//creates supply file
+			try {
+				supplies.createNewFile();
+			} catch (IOException e) {
+				//IOException catcher
+				System.out.println("There was a problem creating the file.");
+				System.out.println("IOException: " + e.getMessage());
+			}
+			
+			//saves file
+			supplies = supplyFileWrite(supply, supplies, suppNum);
+		}
+		
+		equipmentSort(equip);
+		supplySort(supply);
+		
+		while (cont) {
+			
+			displayEquipment(equip, equipNum);
+			displaySupplies(supply, suppNum);
+			
+			choice = inventoryChoices();
+			
+			if(choice == 1) {
+				//edits equipment
+				equipmentEdit(equip);
+			} else if (choice == 2) {
+				//replaces equipment
+				equipmentReplace(equip);
+			} else if (choice == 3) {
+				//adds new piece of equipment
+				equip = equipmentAdd(equip, equipNum);
+				equipNum = equip.length;
+			} else if (choice == 4) {
+				//edits supply
+				supplyEdit(supply);
+			} else if (choice == 5) {
+				//adds new supply
+				supply = supplyAdd(supply, suppNum);
+				suppNum = supply.length;
+			} else if (choice == 6) {
+				//restocks supply
+				supplyRestock(supply);
+			} else if (choice == 7) {
+				//uses supply
+				supplyUse(supply);
+			} else if (choice == 8) {
+				//exit
+				cont = false;
+			}
+			
+			//saving the changes
+			supplies = supplyFileWrite(supply, supplies, suppNum);
+			equipment = equipFileWrite(equip, equipment, equipNum);
+			
+		}
+		
+		//last save before exit
+		System.out.println("\nSaving your changes....");
+		supplies = supplyFileWrite(supply, supplies, suppNum);
+		equipment = equipFileWrite(equip, equipment, equipNum);
+		System.out.println("Changes saved. Exiting inventory.");
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: None
+	 * Post: printed introduction
+	 * Description: Introduces the user to the inventory system
+	 */	
+	public static void inventoryIntro() {
+		
+		System.out.println("Welcome to your salon inventory management system!\n(press enter to continue)");
+		enterCode();
+		
+		System.out.println("This system will allow you to track everything related\n"
+						+ "to inventory, such as: supply prices, current stock, optimal\n" 
+						+ "stock, adding and removing stock, equipment prices, quality,\n" 
+						+ "warranty information and the mechanic number.");
+		enterCode();
+
+		System.out.println("Before you get started, however, there are some\n"
+						+ "things to keep in mind.");
+		enterCode();
+
+		System.out.println("First, depending on whether you’ve run this program on your\n"
+						+ "computer before, your input method will be different. If this\n"
+						+ "program has been run before, don’t worry, you won’t have to\n"
+						+ "do anything!");
+		enterCode();
+
+		System.out.println("If it hasn’t, you’ll have to manually input the information as\n"
+						+ "requested by the program. Once you do, everything will be saved\n" 
+						+ "and you won’t have to do it again.");
+		enterCode();
+				
+		System.out.println("Second, supplies and equipment are divided up for this program.");
+		enterCode();
+
+		System.out.println("So, “supplies” refer to the quick-use items,\n"
+						+ "like bobby pins, scissors, brushes, etc.");
+		enterCode();
+
+		System.out.println("\"Equipment\" refers to the larger items,\n"
+						+ "like chairs, mirrors, desks, etc.");
+		enterCode();
+
+		System.out.println("Third, choices in this program will be partially based on\n"
+						+ "menus that will be displayed. Some menus stay the same no \n"
+						+ "matter what, while others change based on certain values.");
+		enterCode();
+
+		System.out.println("The supplies menu, for example, will be sorted based on how\nclose"
+						+ "a supply’s current stock is to the optimal stock, or the\n“distance”"
+						+ "(shorter distance means closer to the top).");
+		enterCode();
+
+		System.out.println("The equipment menu will be sorted based on the quality, with\nthe"
+						+ "older ones at the top.So don’t be alarmed if the lists look\nslightly "
+						+ "different at times!");
+		enterCode();
+
+		System.out.println("Finally, since there can be a lot of different kinds of\nsupplies/equipment, "
+						+ "each time one of the menus is going to be\ndisplayed, you will be asked how "
+						+ "many you want to see at a time.");
+		enterCode();
+
+		System.out.println("The number you input will be how many you see, ex. If you\ninput 5 you will "
+						+ "see 5 lines at once. This is to make it easier\nfor you to see and read "
+						+ "everything, as too much\ninformation at once can be disorienting.");
+		enterCode();
+
+		System.out.println("Now that you have all of that information, you can start\nmanaging your inventory!");
+		enterCode();
+		
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: None
+	 * Post: the user has selected from the provided menu
+	 * Description: provides the user a menu of options, has them pick from it
+	 */
+	public static int inventoryChoices() {
+		int choice;
+		Scanner input = new Scanner(System.in);
+		
+		do {
+			//takes choice input
+			System.out.println("\nFUNCTIONS\n[1] Edit equipment data\n[2] Replace a piece of equipment\n" +
+					"[3] Add new equipment piece\n[4] Edit supply data\n[5] Add new supply type\n" +
+					"[6] Restock supplies \n[7] Use supply stock\n[8] Exit");
+			System.out.print("Enter the number next to your choice of function: ");
+			choice = input.nextInt();
+		} while (choice < 1 || choice > 8);
+		
+		return choice;
+	}
+	
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: supply file
+	 * Post: supplies array of objects
+	 * Description: reads supply information from a file
+	 */
+	public static Supplies[] defaultInputSupplies(File supplies) {
+		int suppNum = 0;
+		Supplies[] supply = new Supplies[0];
+		FileInputStream fRead;
+		ObjectInputStream read;
+		
+		try {
+			fRead = new FileInputStream(supplies);
+			read = new ObjectInputStream(fRead);
+			
+			//reads number of supplies and initializes supply
+			suppNum = read.readInt();
+			supply = new Supplies[suppNum];
+			
+			for(int i=0; i<suppNum; i++) {
+				//reads object
+				supply[i] = (Supplies)read.readObject();
+			}
+			
+			read.close();
+			fRead.close();
+		} catch (FileNotFoundException e) {
+			//FileNotFoundException catcher
+			System.out.println("File could not be found.");
+			System.out.println("FileNotFoundException: " + e.getMessage());
+		} catch (IOException e) {
+			//IOException catcher
+			System.out.println("Problem reading file.");
+			System.out.println("IOException: " + e.getMessage());
+		} catch (ClassNotFoundException e) {
+			//ClassNotFoundException catcher
+			System.out.println("Class could not be used to cast object.");
+			System.out.println("ClassNotFoundException: " + e.getMessage());
+		}
+		
+		return supply;
+		
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: number of supplies
+	 * Post: supplies array of objects
+	 * Description: takes manual input from user (only if no file exists)
+	 */
+	public static Supplies[] firstInputSupplies(int suppNum) {
+		Scanner input = new Scanner(System.in);
+		String name;
+		double price;
+		int optimal, current;
+		Supplies[] supply = new Supplies[suppNum];
+			
+		for(int i=0; i<suppNum; i++) {
+			
+			//tells the user the supply number
+			System.out.println("\nSUPPLY #" + i);
+			
+			//name input
+			System.out.print("Enter supply name: ");
+			name = input.next();
+			name = name + input.nextLine();
+			
+			//price input
+			System.out.print("Enter the price for ONE of the supply: ");
+			price = input.nextDouble();
+			
+			//current stock input
+			System.out.print("Enter the current stock of the supply: ");
+			current = input.nextInt();
+			
+			//optimal stock input
+			System.out.print("Enter the optimal stock of the supply: ");
+			optimal = input.nextInt();
+			
+			supply[i] = new Supplies(name, price, current, optimal);
+			
+		}
+		
+		return supply;
+			
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: supplies array of objects, supplies file, number of supplies
+	 * Post: file with supply information
+	 * Description: writes ("saves") equipment information to file
+	 */
+	public static File supplyFileWrite(Supplies[] supply, File supplies, int suppNum) {
+		
+		FileOutputStream fWrite;
+		ObjectOutputStream write;
+		
+		try {
+			fWrite = new FileOutputStream(supplies, false);
+			write = new ObjectOutputStream(fWrite);
+			
+			//writes supply number
+			write.writeInt(suppNum);
+			
+			for(int i=0; i<suppNum; i++) {
+				
+				//serializes object
+				write.writeObject(supply[i]);
+				
+			}
+			
+			write.close();
+			fWrite.close();
+		} catch (FileNotFoundException e) {
+			//FileNotFoundException catcher
+			System.out.println("File could not be found.");
+			System.out.println("FileNotFoundException: " + e.getMessage());
+		} catch (IOException e) {
+			//IOException catcher
+			System.out.println("There was a problem writing to the file.");
+			System.out.println("IOException: " + e.getMessage());
+		}
+		
+		return supplies;
+		
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: supply array of objects, number of supplies at a time
+	 * Post: supply displayed
+	 * Description: displays supplies, a few at a time, based on numAtATime
+	 */
+	public static void displaySupplies(Supplies[] supply, int numAtATime) {
+		boolean cont = true;
+		int print = 0, max = supply.length;
+		
+		//sorting
+		supplySort(supply);
+		
+		System.out.println("\n    NAME\t\tPRICE\tCURRENT STOCK\tOPTIMAL STOCK\tDISTANCE");
+		
+		while (cont) {
+			//prints the supplies
+			for(int i=print; i<print+numAtATime&&i<max; i++) {
+				System.out.print("[" + i + "] " + supply[i].getName() + "\t");
+				
+				if(supply[i].getName().length() <= 3) {
+					System.out.print("\t\t");
+				} else if(supply[i].getName().length() <= 11) {
+					System.out.print("\t");
+				}
+				
+				System.out.println(supply[i].getPrice() + "\t" + supply[i].getCurrent() + "\t\t" 
+								+ supply[i].getOptimal() + "\t\t" + supply[i].getDistance());
+			}
+			
+			//updates print
+			print += numAtATime;
+			
+			if(print >= max) {
+				//if there won't be any more supplies left to print
+				cont = false;
+			} else {
+				//user has to hit enter to continue
+				enterCode();
+			}
+		}
+		
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: supplies array of objects
+	 * Post: selected item
+	 * Description: displays supplies and has the user choose which one they want to edit/replace/restock/etc
+	 */
+	public static int displayChoiceSupplies(Supplies[] supply) {
+		int numAtATime, item;
+		Scanner input = new Scanner(System.in);
+		
+		//display setup
+		System.out.print("\nEnter how many items you want to see at once: ");
+		numAtATime = input.nextInt();
+		
+		//display
+		displaySupplies(supply, numAtATime);
+		
+		//item choice
+		do {
+			System.out.print("Enter the number next to the item you want to edit: ");
+			item = input.nextInt();
+		} while (item > supply.length || item < 0);
+		
+		return item;
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: supply array of objects
+	 * Post: sorted array
+	 * Description: sorts the supply array (ascending) based on distance to optimal stock
+	 */
+	public static void supplySort(Supplies[] supply) {
+		int finish = supply.length;
+		Supplies save = new Supplies();
+		int dist1 = 0, dist2 = 0;
+		
+		while(finish > 0) {
+			
+			for(int a=0; a<finish-1; a++) {		
+				
+				if (a == finish-1) {
+					//makes sure there's no out of bounds exception thrown
+				} else {
+					//taking the two distances being compared
+					dist1 = supply[a].getDistance();
+					dist2 = supply[a+1].getDistance();
+				}
+				
+				//switching if needed
+				if (dist1 > dist2) {
+					save = supply[a];
+					supply[a] = supply[a+1];
+					supply[a+1] = save;
+				}
+			}
+			
+			//marking down how many are finished
+			finish--;
+			
+		}
+		
+	}
+	
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: Supplies array of objects
+	 * Post: edited supplies array of objects
+	 * Description: changes variables of the supply selected by the user
+	 */
+	public static void supplyEdit(Supplies[] supply) {
+		Scanner input = new Scanner(System.in);
+		int item, editing;
+		boolean edit = true;
+		
+		//item choice
+		item = displayChoiceSupplies(supply);
+		
+		
+		while(edit) {
+			
+			//edit choice
+			do {
+				System.out.println("\n[1] Edit name\n[2] Edit price\n[3] Edit optimal stock\n"+
+						"[4] Go back to choice menu");
+				System.out.print("Enter the number next to your choice: ");
+				editing = input.nextInt();
+				
+			} while (editing > 4 || editing < 1);
+			
+			
+			if (editing == 1) {
+				
+				String name;
+				
+				//name input
+				System.out.print("\nEnter supply's new name: ");
+				name = input.next();
+				name = name + input.nextLine();
+				
+				//sets new name
+				supply[item].setName(name);
+				
+				//communicates that name has been set
+				System.out.println("The name has been sucessfully changed.");
+				
+			} else if (editing == 2) {
+				
+				double price;
+				
+				//price input
+				System.out.print("\nEnter the new price for ONE of the supply: ");
+				price = input.nextDouble();
+				
+				//sets new price
+				supply[item].setPrice(price);
+				
+				//communicates that price has been changed
+				System.out.println("The price has been sucessfully changed.");
+				
+			} else if (editing == 3) {
+				
+				int optStock;
+				
+				//optimal stock input
+				System.out.print("\nEnter the new optimal stock of the supply: ");
+				optStock = input.nextInt();
+				
+				//sets optimal stock
+				supply[item].setOptimal(optStock);
+				
+				//communicates that optimal stock has been set
+				System.out.println("The optimal stock has been sucessfully changed.");
+				
+			} else if (editing == 4) {
+				//exiting supply edits
+				edit = false;
+			}
+			
+		}
+		
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: supplies array of objects, array length
+	 * Post: new supplies array of objects
+	 * Description: adds a new supply type to the array of objects
+	 */	
+	public static Supplies[] supplyAdd(Supplies[] supply, int suppNum) {
+		String name;
+		double price;
+		int optimal, current;
+		Scanner input = new Scanner(System.in);
+		Supplies[] newSupply = new Supplies[suppNum+1];
+		Billing bill = new Billing();
+		
+		//saves old supply to new supply
+		for(int i=0; i<suppNum; i++) {
+			newSupply[i] = supply[i];
+		}
+		
+		//tells the user it's new supply
+		System.out.println("\nNEW SUPPLY");
+		
+		//name input
+		System.out.print("Enter supply name: ");
+		name = input.next();
+		name = name + input.nextLine();
+		
+		//price input
+		System.out.print("Enter the price for ONE of the supply: ");
+		price = input.nextDouble();
+		
+		//current stock input
+		System.out.print("Enter the current stock of the supply: ");
+		current = input.nextInt();
+		
+		//optimal stock input
+		System.out.print("Enter the optimal stock of the supply: ");
+		optimal = input.nextInt();
+		
+		//adds new supply
+		newSupply[suppNum] = new Supplies(name, price, current, optimal);
+		
+		//price from billing
+		price = bill.inventory(newSupply[suppNum].getName(), newSupply[suppNum].getPrice(), newSupply[suppNum].getCurrent());
+		balance -= price;
+		
+		//balance display
+		System.out.println("Your balance is now: " + balance);
+		
+		//shows user what the new supply is
+		System.out.println("\nNew Supply\n" + newSupply[suppNum].toString());
+		
+		System.out.println("\n(Press enter to continue)");
+		enterCode();
+		
+		return newSupply;
+		
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: supplies array of objects
+	 * Post: the selected supply is restocked, price deducted from balance
+	 * Description: restocks a chosen supply, indicated by the user
+	 */
+	public static void supplyRestock(Supplies[] supply) {
+		Scanner input = new Scanner(System.in);
+		Billing bill = new Billing();
+		int item, quantity;
+		double price;
+		
+		//item choice
+		item = displayChoiceSupplies(supply);
+		
+		System.out.println("Enter how many items you want to buy: ");
+		quantity = input.nextInt();
+		
+		//price from billing
+		price = bill.inventory(supply[item].getName(), supply[item].getPrice(), quantity);
+		
+		//adding stock and deducting balance
+		supply[item].addStock(quantity);
+		balance -= price;
+		
+		//balance display
+		System.out.println("Your balance is now: " + balance);
+		
+		//supply current stock display
+		System.out.println("The current stock for " + supply[item].getName() + " is " + supply[item].getCurrent());
+		
+		System.out.println("\n(Press enter to continue)");
+		enterCode();
+		
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: supply array of objects
+	 * Post: current stock deducted for selected supply
+	 * Description: "uses" the supplies by subtracting from the current stock
+	 */
+	public static void supplyUse(Supplies[] supply) {
+		Scanner input = new Scanner(System.in);
+		int item, used;
+		boolean less = false;
+		
+		//item choice
+		item = displayChoiceSupplies(supply);
+		
+		//making sure they don't use more than they have
+		do {
+			System.out.print("How many you used: ");
+			used = input.nextInt();
+			
+			if(used > supply[item].getCurrent()) {
+				System.out.println(used + " is more than you have in stock. Please enter another number.");
+			} else {
+				less = true;
+			}
+		} while (!less);
+		
+		//changes stock
+		supply[item].useStock(used);
+		
+		//communicates that stock has been deducted
+		System.out.println("Stock has successfully been deducted.");
+		
+	}
+	
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: equipment file
+	 * Post: equipment array of objects
+	 * Description: reads equipment information from a file
+	 */
+	public static Equipment[] defaultInputEquipment(File equipment) {
+		int equipNum = 0;
+		double mechNum;
+		Equipment[] equip = new Equipment[0];
+		FileInputStream fRead;
+		ObjectInputStream read;
+		
+		try {
+			fRead = new FileInputStream(equipment);
+			read = new ObjectInputStream(fRead);
+			
+			//reads number of pieces of equipment and initializes equip
+			equipNum = read.readInt();
+			equip = new Equipment[equipNum];
+			
+			for(int i=0; i<equipNum; i++) {
+				//reads object
+				equip[i] = (Equipment)read.readObject();
+			}
+			
+			//taking mechanic number because APPARNETLY class variables don't serialize
+			mechNum = read.readDouble();
+			mechNum = mechNum*10000;
+			long mech = (long) mechNum;
+			
+			equip[0].setMechNum(mech);
+			
+			read.close();
+			fRead.close();
+		} catch (FileNotFoundException e) {
+			//FileNotFoundException catcher
+			System.out.println("File could not be found.");
+			System.out.println("FileNotFoundException: " + e.getMessage());
+		} catch (IOException e) {
+			//IOException catcher
+			System.out.println("Problem reading file.");
+			System.out.println("IOException: " + e.getMessage());
+		} catch (ClassNotFoundException e) {
+			//ClassNotFoundException catcher
+			System.out.println("Class could not be used to cast object.");
+			System.out.println("ClassNotFoundException: " + e.getMessage());
+		}
+		
+		return equip;
+		
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: number of pieces of equipment
+	 * Post: equipment array of objects
+	 * Description: takes manual input from user (only if no file exists)
+	 */
+	public static Equipment[] firstInputEquipment(int equipNum) {
+		Scanner input = new Scanner(System.in);
+		String name, str;
+		double price;
+		int warYears, quality;
+		long mechanicNum = 0;
+		boolean warranty;
+		Equipment[] equip = new Equipment[equipNum];
+			
+		for(int i=0; i<equipNum; i++) {
+				
+			//tells the user the equipment number
+			System.out.println("\nEQUIPMENT #" + i);
+			
+			//name input
+			System.out.print("Enter equipment name: ");
+			name = input.next();
+			name = name + input.nextLine();
+			
+			//price input
+			System.out.print("Enter the price for ONE of the equipment: ");
+			price = input.nextDouble();
+			
+			//quality input
+			do {
+				System.out.println("\n[1] New\n[2] Moderate\n[3] Old\n[4] Very old");
+				System.out.print("Enter the number next to the quality of the equipment: ");
+				quality = input.nextInt();
+			} while (quality > 4 || quality < 1);
+			
+			//warranty input
+			System.out.print("\nDoes the equipment have a warranty? (y/n) ");
+			str = input.next();
+			if(str.equalsIgnoreCase("y")) {
+				warranty = true;
+			} else {
+				warranty = false;
+			}
+			
+			//warranty years input
+			if (warranty) {
+				System.out.print("Enter the number of years left on the warranty: ");
+				warYears = input.nextInt();
+			} else {
+				warYears = 0;
+			}
+			
+			if(i == 0) {
+				
+				//mechanic number input
+				System.out.print("Enter the mechanics phone number as\none whole number (ex. 1234567890): ");
+				mechanicNum = input.nextLong();
+				
+			}
+			
+			equip[i] = new Equipment(name, price, quality, warranty, warYears, mechanicNum);
+			
+		}
+		
+		return equip;
+		
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: equipment array of objects, equipment file, number of pieces of equipment
+	 * Post: file with equipment information
+	 * Description: writes ("saves") equipment information to file
+	 */
+	public static File equipFileWrite(Equipment[] equip, File equipment, int equipNum) {
+		
+		FileOutputStream fWrite;
+		ObjectOutputStream write;
+		
+		try {
+			fWrite = new FileOutputStream(equipment, false);
+			write = new ObjectOutputStream(fWrite);
+			
+			//writes equipment number
+			write.writeInt(equipNum);
+			
+			for(int i=0; i<equipNum; i++) {
+				
+				//serializes object
+				write.writeObject(equip[i]);
+				
+			}
+			
+			//writing mechanic number because APPARENTLY class variables don't serialize
+			long mechNum = equip[0].getMechNum();
+			double mech = (double)mechNum/10000;
+			write.writeDouble(mech);
+			
+			write.close();
+			fWrite.close();
+		} catch (FileNotFoundException e) {
+			//FileNotFoundException catcher
+			System.out.println("File could not be found.");
+			System.out.println("FileNotFoundException: " + e.getMessage());
+		} catch (IOException e) {
+			//IOException catcher
+			System.out.println("There was a problem writing to the file.");
+			System.out.println("IOException: " + e.getMessage());
+		}
+		
+		return equipment;
+		
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: equipment array of objects, number of pieces of equipment at a time
+	 * Post: equipment displayed
+	 * Description: displays equipment, a few at a time, based on numAtATime
+	 */
+	public static void displayEquipment(Equipment[] equip, int numAtATime) {
+		
+		boolean cont = true;
+		int print = 0, max = equip.length, quality;
+		
+		//sorting
+		equipmentSort(equip);
+		
+		System.out.println("\n    NAME\t\tQUALITY\tREPLACE\tPRICE\tWARRANTY\tWARRANTY YEARS\tMECHANIC NUMBER");
+		
+		while (cont) {
+			//prints the equipment
+			for(int i=print; i<print+numAtATime&&i<max; i++) {
+				System.out.print("[" + i + "] " + equip[i].getName() + "\t");
+				
+				if(equip[i].getName().length() <= 11) {
+					System.out.print("\t");
+				}
+				
+				quality = equip[i].getQuality();
+				
+				if(quality == 1) {
+					System.out.print("New\t");
+				} else if (quality == 2) {
+					System.out.print("Moderate");
+				} else if (quality == 3) {
+					System.out.print("Old\t");
+				} else if (quality == 4) {
+					System.out.print("Very old");
+				}
+				
+				System.out.println(equip[i].getReplace() + "\t" + equip[i].getPrice() + "\t" 
+						+ equip[i].getWarranty() + "\t\t" + equip[i].getWarYears() 
+						+ "\t\t" + equip[i].getMechNum());
+			}
+			
+			//updates print
+			print += numAtATime;
+			
+			if(print >= max) {
+				//if there won't be any more supplies left to print
+				cont = false;
+			} else {
+				//user has to hit enter to continue
+				enterCode();
+			}
+		}
+		
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: equipment array of objects
+	 * Post: selected item
+	 * Description: displays equipment and has the user choose which one they want to edit/replace/etc
+	 */
+	public static int displayChoiceEquip(Equipment[] equip) {
+		int numAtATime, item;
+		Scanner input = new Scanner(System.in);
+		
+		//display setup
+		System.out.print("\nEnter how many items you want to see at once: ");
+		numAtATime = input.nextInt();
+		
+		//display
+		displayEquipment(equip, numAtATime);
+		
+		//item choice
+		do {
+			System.out.print("Enter the number next to the item you want to choose: ");
+			item = input.nextInt();
+		} while (item > equip.length || item < 0);
+		
+		return item;
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: equipment array of objects
+	 * Post: sorted array
+	 * Description: sorts the equipment array (descending) based on quality of the equipment
+	 */
+	public static void equipmentSort(Equipment[] equip) {
+		int finish = equip.length;
+		Equipment save = new Equipment();
+		int dist1 = 0, dist2 = 0;
+		
+		while(finish > 0) {
+			
+			for(int a=0; a<finish-1; a++) {		
+				
+				if (a == finish-1) {
+					//makes sure there's no out of bounds exception thrown
+				} else {
+					//taking the two distances being compared
+					dist1 = equip[a].getQuality();
+					dist2 = equip[a+1].getQuality();
+				}
+				
+				//switching if needed
+				if (dist1 < dist2) {
+					save = equip[a];
+					equip[a] = equip[a+1];
+					equip[a+1] = save;
+				}
+			}
+			
+			//marking down how many are finished
+			finish--;
+			
+		}
+		
+	}
+	
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: equipment array of objects
+	 * Post: edited equipment array of objects
+	 * Description: changes variables of the equipment piece selected by the user
+	 */
+	public static void equipmentEdit(Equipment[] equip) {
+		Scanner input = new Scanner(System.in);
+		int item, editing;
+		boolean edit = true;
+		
+		//choice of item
+		item = displayChoiceEquip(equip);
+		
+		while(edit) {
+			
+			//edit choice
+			do {
+				System.out.println("\n[1] Edit name\n[2] Edit quality\n[3] Edit warranty status\n[4] Edit years of warranty\n"+
+						"[5] Edit mechanic number\n[6] Edit price\n[7] Go back to choice menu");
+				System.out.print("Enter the number next to your choice: ");
+				editing = input.nextInt();
+				
+			} while (editing > 7 || editing < 1);
+			
+			if (editing == 1) {
+				
+				String name;
+				
+				//name input
+				System.out.print("Enter the new equipment name: ");
+				name = input.next();
+				name = name + input.nextLine();
+				
+				//sets name
+				equip[item].setName(name);
+				
+				//communicates that name has been set
+				System.out.println("The name has been sucessfully changed.");
+				
+			} else if (editing == 2) {
+				
+				int quality;
+				
+				//quality input
+				do {
+					System.out.println("\n[1] New\n[2] Moderate\n[3] Old\n[4] Very old");
+					System.out.print("Enter the number next to the new quality of the equipment: ");
+					quality = input.nextInt();
+				} while (quality > 4 || quality < 1);
+				
+				//sets quality
+				equip[item].setQuality(quality);
+				
+				//communicates that quality has been set
+				System.out.println("The quality has been sucessfully changed.");
+				
+			} else if (editing == 3) {
+				
+				boolean warranty;
+				int warYears;
+				String str;
+				
+				//warranty input
+				System.out.print("\nDoes the equipment have a warranty? (y/n) ");
+				str = input.next();
+				if(str.equalsIgnoreCase("y")) {
+					warranty = true;
+				} else {
+					warranty = false;
+				}
+				
+				//sets warranty
+				equip[item].setWarranty(warranty);
+				
+				//warranty years input
+				if (warranty) {
+					//if there is a warranty, asks for # of years
+					System.out.print("Enter the number of years left on the warranty: ");
+					warYears = input.nextInt();
+				} else {
+					//if there is none, set to 0
+					warYears = 0;
+				}
+				
+				//sets warranty years
+				equip[item].setWarYears(warYears);
+				
+				//communicated that warranty/warranty years has been set
+				System.out.println("The warranty status (and warranty years) has been sucessfully changed.");
+				
+			} else if (editing == 4) {
+				
+				int warYears = 0;
+				
+				//gets warranty years, but only if there is a warranty
+				if(!equip[item].getWarranty()) {
+					System.out.println("\nSorry, this item doesn't have a warranty, please change that first!");
+				} else {
+					System.out.print("\nEnter the number of years left on the warranty: ");
+					warYears = input.nextInt();
+				}
+				
+				//sets warranty years
+				equip[item].setWarYears(warYears);
+				
+				//communicated that warranty years has been set
+				System.out.println("The years of warranty left have been sucessfully changed.");
+				
+			} else if (editing == 5) {
+				
+				long mechanicNum;
+				
+				//takes mechanic number input, with a warning that it will change all of equipment
+				System.out.println("\nChanging this will affect all pieces of equipment.");
+				System.out.print("Enter the new mechanics phone number as\none whole number (ex. 1234567890): ");
+				mechanicNum = input.nextLong();
+				
+				//sets mechanic number
+				equip[item].setMechNum(mechanicNum);
+				
+				//communicates that mechanic number has been set
+				
+				System.out.println("The mechanic's number has been sucessfully changed.");
+				
+			} else if (editing == 6) {
+				
+				double price;
+				
+				//takes price input
+				System.out.print("\nEnter the new price for ONE of the equipment: ");
+				price = input.nextDouble();
+				
+				//sets price
+				equip[item].setPrice(price);
+				
+				//communicates that price has been set
+				System.out.println("The price has been sucessfully changed.");
+				
+			} else if (editing == 7) {
+				edit = false;
+			}
+			
+		}
+		
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: equipment array of objects, array length
+	 * Post: new equipment array of objects
+	 * Description: adds a new object to the array of objects
+	 */
+	public static Equipment[] equipmentAdd(Equipment[] equip, int equipNum) {
+		String name;
+		double price;
+		int quality, warYears;
+		boolean warranty;
+		Scanner input = new Scanner(System.in);
+		Equipment[] newEquip = new Equipment[equipNum+1];
+		Billing bill = new Billing();
+		
+		//saves old supply to new supply
+		for(int i=0; i<equipNum; i++) {
+			newEquip[i] = equip[i];
+		}
+		
+		//tells the user that it's new equipment
+		System.out.println("\nNEW EQUIPMENT");
+		
+		//name input
+		System.out.print("Enter equipment name: ");
+		name = input.next();
+		name = name + input.nextLine();
+		
+		//price input
+		System.out.print("Enter the price for ONE of the equipment: ");
+		price = input.nextDouble();
+		
+		//quality input
+		do {
+			System.out.println("\n[1] New\n[2] Moderate\n[3] Old\n[4] Very old");
+			System.out.print("Enter the number next to the quality of the equipment: ");
+			quality = input.nextInt();
+		} while (quality > 4 || quality < 1);
+		
+		//warranty input
+		System.out.print("Does the equipment have a warranty? (true/false) ");
+		warranty = input.nextBoolean();
+		
+		//warranty years input
+		if (warranty) {
+			System.out.print("Enter the number of years left on the warranty: ");
+			warYears = input.nextInt();
+		} else {
+			warYears = 0;
+		}
+		
+		//adds new equipment
+		newEquip[equipNum] = new Equipment(name, price, quality, warranty, warYears, newEquip[0].getMechNum());
+		
+		//price from billing
+		price = bill.equipment(newEquip[equipNum].getName(), newEquip[equipNum].getPrice());
+		balance -= price;
+		
+		//balance display
+		System.out.println("Your balance is now: " + balance);
+		
+		//shows user what the new equipment is
+		System.out.println("\nNew Equipment\n" + newEquip[equipNum].toString());
+		
+		return newEquip;
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: equipment array of objects
+	 * Post: one piece of equipment is replaces
+	 * Description: replaces a chosen piece of equipment by going through set methods
+	 * 				price is deducted from balance
+	 */
+	public static void equipmentReplace(Equipment[] equip) {
+		Billing bill = new Billing();
+		Scanner input = new Scanner(System.in);
+		int item, quality, warYears;
+		boolean warranty;
+		double price;
+		String str;
+		
+		//choice of item
+		item = displayChoiceEquip(equip);
+		
+		//quality input
+		do {
+			System.out.println("\n[1] New\n[2] Moderate\n[3] Old\n[4] Very old");
+			System.out.print("Enter the number next to the new quality of the new equipment: ");
+			quality = input.nextInt();
+		} while (quality > 4 || quality < 1);
+		
+		//warranty input
+		System.out.print("\nDoes the equipment have a warranty? (y/n) ");
+		str = input.next();
+		if(str.equalsIgnoreCase("y")) {
+			warranty = true;
+		} else {
+			warranty = false;
+		}
+		
+		//warranty years input
+		if (warranty) {
+			System.out.print("Enter the number of years left on the warranty: ");
+			warYears = input.nextInt();
+		} else {
+			warYears = 0;
+		}
+		
+		//replaces equipment
+		equip[item].replaceEquip(quality, warranty, warYears);
+		
+		//price from billing
+		price = bill.equipment(equip[item].getName(), equip[item].getPrice());
+		balance -= price;
+		
+		//balance display
+		System.out.println("Your balance is now: " + balance);
+		
+		//shows user what the new equipment is
+		System.out.println("\nNew Equipment\n" + equip[item].toString());
+		
+	}
+	
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: None
+	 * Post: User has hit the enter key
+	 * Description: Requires the user to hit the enter key to continue
+	 */
+	public static void enterCode() {
+		String next;
+		boolean cont = false;
+		Scanner input = new Scanner(System.in);
+		
+		//User needs to hit the enter key to continue
+		do {
+			next = input.nextLine();
+			if (next.isEmpty()) {
+				cont = true;
+			}
+		} while (cont == false);
+		cont = false;
+	}
+	/*
+	 * Author: Elizabeth Wright
+	 * Pre: none
+	 * Post: balance
+	 * Description: returns balance
+	 */
+	public static double getBalance() {
+    	//returns balance
+		return balance;
+	}
+	
+}

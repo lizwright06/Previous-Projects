@@ -1,0 +1,48 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: April 8, 2022
+ * Date Finished: April 25, 2022
+ * Description: Inventory class for the hair salon software project (stores name and price)
+ */
+
+package inheritanceSalonProjectStartedApr8;
+import java.io.*;
+public class Inventory implements Serializable {
+	
+	String name;
+	double pricePer;
+	
+	public Inventory() {
+		//default constructor
+		name = "";
+		pricePer = 0;
+	}
+	public Inventory(String n) {
+		//overloaded constructor
+		name = n;
+	}
+	public Inventory(String n, double price) {
+		//overloaded constructor
+		name = n;
+		pricePer = price;
+	}
+	
+	public void setName(String n) {
+		//sets name of inventory piece
+		name = n;
+	}
+	public void setPrice(double price) {
+		//sets price of inventory piece
+		pricePer = price;
+	}
+	
+	public String getName() {
+		//returns name
+		return name;
+	}
+	public double getPrice() {
+		//returns price
+		return pricePer;
+	}
+	
+}

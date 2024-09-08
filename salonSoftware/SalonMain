@@ -1,0 +1,130 @@
+/*
+ * Name: [group member]
+ * Date: April 26, 2022
+ * Description: Main client used to run the SalonSoftware
+ */
+
+package inheritanceSalonProjectStartedApr8;
+import java.text.ParseException;
+import java.util.Scanner;
+import java.io.*;
+
+public class SalonMain {
+	
+	//tracks the balance
+	static double balance;
+	
+    /*
+     * Author: [group member]
+     * Description: The main client code method of the program
+     * Pre: none
+     * Post: Exits the program
+     */
+    public static void main(String[] args) throws ParseException {
+    	Scanner myObj = new Scanner(System.in);
+
+        boolean cont = true;
+        int choice = 0;
+        File testClient = new File ("clients.dat");
+        File testEmployees = new File ("employees.dat");
+        File testSupplies = new File ("supplies.txt");
+        File testEquipment = new File ("equipment.txt");
+
+        introduction();
+
+        balance = getBalance();
+        /*
+        //If any files are missing, sends the user to the pages to initialize the files
+        if (!checkExistence(testClient)){
+            System.out.println("Proceeding to the Clients page to initialize your clients. Press the exit key specified when you are done.");
+            ClientFile.clientMain();
+        }
+
+        if (!checkExistence(testEmployees)){
+            System.out.println("Proceeding to the Employees page to initialize your clients. Press the exit key specified when you are done.");
+            EmployeeFile.employeeMain();
+        }
+		*/
+        if (!checkExistence(testSupplies) || !checkExistence(testEquipment)){
+            System.out.println("Proceeding to the Inventory page to initialize your supplies and/or equipment. Press the exit key specified when you are done.");
+            inventoryClient.inventoryMain(balance);
+        }
+
+        //While loop to allow the user to continuously access the different menus
+        while (cont) {
+        	displayChoices();
+            choice = myObj.nextInt();
+
+            if (choice == 1){
+               // ClientFile.clientMain();
+            } else if (choice == 2){
+               // EmployeeFile.employeeMain();
+            } else if (choice == 3){
+                inventoryClient.inventoryMain(balance);
+              //Update the balance in case of any changes to the inventory
+                balance = inventoryClient.getBalance();
+            } else if (choice == 4){
+                //Booking.bookingMain(balance);
+            	//Update the balance in case of any new bookings
+            	//balance = Booking.mainGetBalance();
+            } else if (choice == 5){
+               // PromoClient.promotionsMain();
+            } else if (choice == 6){
+                System.out.printf("\nCurrent balance: $%.2f", balance);
+                System.out.println();
+            } else if (choice == 7){
+                System.out.println("Closing Salon Software...");
+                cont = false;
+            } else{
+                System.out.println("Invalid choice!");
+            }
+        }
+    }
+
+    /*
+     * Author: [group member]
+     * Description: Outputs introductory remarks
+     * Pre: none
+     * Post: Outputs and continues through the program
+     */
+    public static void introduction(){
+        System.out.println("Welcome to the Salon Software.");
+        System.out.println("Before proceeding, the software will check to see if there is any initial information we need from you.\n");
+    }
+    
+    /*
+     * Author: [group member]
+     * Description: Gets the beginning balance from the user
+     * Pre: none
+     * Post: Returns the balance input
+     */
+    public static int getBalance() {
+        Scanner myObj = new Scanner(System.in);
+
+        System.out.print("What is your balance? ");
+        int balance = myObj.nextInt();
+        return balance;
+    }
+    
+    /*
+     * Author: [group member]
+     * Description: Displays all options to the user
+     * Pre: none
+     * Post: Prints a formatted display of choices
+     */
+    public static void displayChoices(){
+        System.out.println("\nWhat would you like to do? ");
+        System.out.println("1. Manage Clients\n2. Manage Employees\n3. Manage Equipment and Supplies\n4. Manage Schedule" +
+                "\n5. Manage Promotions\n6. Check Balance\n7. Exit Program");
+    }
+    
+    /*
+     * Author: [group member]
+     * Description: Check if the file already exists
+     * Pre: The file of clients
+     * Post: Either true or false
+     */
+    public static boolean checkExistence(File theFile) {
+        return theFile.exists();
+    }
+}

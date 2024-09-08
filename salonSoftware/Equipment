@@ -1,0 +1,105 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: April 8, 2022
+ * Date Finished: April 25, 2022
+ * Description: Equipment class for the hair salon software project (stores quality, warranty info and mechanic number)
+ */
+
+package inheritanceSalonProjectStartedApr8;
+import java.io.*;
+public class Equipment extends Inventory implements Serializable {
+	private static final long serialVersionUID = 7386959364771281381L;
+	
+	int quality, warYrs;
+	boolean warranty, replace;
+	static long mechanicNum;
+	
+	public Equipment() {
+		//default constructor
+		super();
+		quality = 0;
+		warYrs = 0;
+		warranty = false;
+		replace = false;
+	}
+	public Equipment(String n,int q) {
+		//overloaded constructor
+		super(n);
+		quality = q;
+	}
+	public Equipment(String n, double p, int q, boolean w, int wY, long mech) {
+		//overloaded constructor
+		super(n, p);
+		quality = q;
+		warranty = w;
+		warYrs = wY;
+		mechanicNum = mech;
+	}
+	
+	public void replaceEquip(int q, boolean w, int wY) {
+		//'replaces' equipment by going through the appropriate set methods
+		setQuality(q);
+		setWarranty(w);
+		setWarYears(wY);
+	}
+	public String toString() {
+		//returns all information in a string
+		return "Name: " + super.getName() +
+				"\nPrice: " + super.getPrice() +
+				"\nHas Warranty: " + getWarranty() +
+				"\nWarranty Years: " + getWarYears() +
+				"\nQuality: " + getQuality() +
+				"\nReplacement Needed: " + getReplace() +
+				"\nMechanic Number: " + getMechNum();
+	}
+	
+	public void setReplace() {
+		//determines if equipment needs to be replaced based on quality variable
+		//new = 1, mod = 2, old = 3, v. old = 4
+		if (quality >= 3) {
+			replace = true;
+		} else {
+			replace = false;
+		}
+		
+	}
+	public void setQuality(int q) {
+		//sets quality
+		quality = q;
+		setReplace();
+	}
+	public void setWarranty(boolean w) {
+		//sets warranty
+		warranty = w;
+	}
+	public void setWarYears(int wY) {
+		//sets warranty years
+		warYrs = wY;
+	}
+	public void setMechNum(long num) {
+		//sets the mechanic num for all equipment
+		mechanicNum = num;
+	}
+	
+	public boolean getReplace() {
+		//returns replace
+		return replace;
+	}
+	public int getQuality() {
+		//returns quality
+		return quality;
+	}
+	public boolean getWarranty() {
+		//returns warranty
+		return warranty;
+	}
+	public int getWarYears() {
+		//returns warranty years
+		return warYrs;
+	}
+	public long getMechNum() {
+		//returns the mechanic's number
+		return mechanicNum;
+	}
+	
+}

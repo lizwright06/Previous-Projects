@@ -1,0 +1,71 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: April 8, 2022
+ * Date Finished: April 25, 2022
+ * Description: Supplies class for the hair salon software project (stores current stock and optimal stock)
+ */
+
+package inheritanceSalonProjectStartedApr8;
+import java.io.*;
+public class Supplies extends Inventory implements Serializable {
+	
+	int currStock, optStock;
+	
+	public Supplies() {
+		//default constructor
+		super();
+		currStock = 0;
+		optStock = 0;
+	}
+	public Supplies(String n, int c) {
+		//overloaded constructor
+		super(n);
+		currStock = c;
+	}
+	public Supplies(String n, double p, int c, int o) {
+		//overloaded constructor
+		super(n, p);
+		currStock = c;
+		optStock = o;
+	}
+	
+	public void setCurrent(int c) {
+		//sets current stock
+		currStock = c;
+	}
+	public void setOptimal(int o) {
+		//sets optimal stock
+		optStock = o;
+	}
+	
+	public int getCurrent() {
+		//returns current stock
+		return currStock;
+	}
+	public int getOptimal() {
+		//returns optimal stock
+		return optStock;
+	}
+	public int getDistance() {
+		//returns difference between current and optimal stock
+		return currStock-optStock;
+	}
+	
+	public String toString() {
+		//returns info in a string
+		return "Name: " + super.getName() +
+				"\nPrice: " + super.getPrice() +
+				"\nCurrent Stock: " + getCurrent() +
+				"\nOptimal Stock: " + getOptimal() +
+				"\nHow Many Left Until Restock Necessary: " + getDistance();
+	}
+	public void useStock(int used) {
+		//when stock is used
+		currStock -= used;
+	}
+	public void addStock(int num) {
+		//when stock is bought
+		currStock += num;
+	}
+	
+}
