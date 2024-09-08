@@ -1,0 +1,211 @@
+/*
+ * Student: Elizabeth Wright
+ * Date Started: November 29, 2020
+ * Date Completed: December 3, 2020
+ * Description: Converts Roman numeral numbers to base 10 numbers. 
+ * Next, offers to the user to convert to another base.
+ * Both questions will be asked continuously until the specified exit key is entered.
+ */
+
+import java.util.*;
+public class ICS3U_FullCode_ElizabethWright {
+	public static void main(String[] args) {
+		//Variable declaration and initialization
+		String romanNumeralOG, romanNumeral, hexaConverted = " ", validCheck;
+		char letter, hexaValue = 'x';
+		final int i = 1, v = 5, x = 10, l = 50, c = 100, d = 500, m = 1000;
+		int lessThan = 0, convertBase, length1, letterValue = 0, sum = 0;
+		int wholeNumber, decimal, charNum = 0, valid = 0;
+		long multiplier = 1, remainder, converted = 0;
+		boolean convertExit = false, convert;
+		Scanner input = new Scanner(System.in);
+		
+		//Beginning instructions/information
+		System.out.println("Hello! This program will convert your Roman numeral into a base 10 number." 
+				+ "\nYou will also be given options for further conversions. Please follow the instructions given. \n");
+		
+		//While loop for conversions
+		while (convertExit == false) {
+			//Do-while loop to get input and validate it
+			do {
+				charNum = 0;
+				valid = 0;
+				
+				System.out.print("\nEnter a Roman numeral to be converted into a base 10 number, or enter 'exit' to exit conversions: ");
+				romanNumeralOG = input.next();
+				romanNumeral = romanNumeralOG;
+				length1 = romanNumeral.length();
+			
+				while (charNum < length1) {
+					validCheck = romanNumeral.substring(charNum, charNum+1);
+				
+					if (romanNumeralOG.equalsIgnoreCase("exit")) {
+						valid = 0;
+						charNum = length1 - 1;
+					} else if(validCheck.equalsIgnoreCase("i") || validCheck.equalsIgnoreCase("v") 
+							|| validCheck.equalsIgnoreCase("x") || validCheck.equalsIgnoreCase("l") 
+							|| validCheck.equalsIgnoreCase("c") || validCheck.equalsIgnoreCase("d") 
+							|| validCheck.equalsIgnoreCase("m")) {
+						
+					} else {
+						valid++;
+					}
+					charNum++;
+				} //Valid while loop
+			
+			} while (valid != 0); //Verification do-while loop
+			
+			//If the user wants to exit, the exit boolean is set to true. Otherwise the conversion is done
+			if (romanNumeral.equalsIgnoreCase("exit")) {
+				convertExit = true;
+			} else {
+				//Establishing the last letter value do know what numbers should be negative
+				if (romanNumeral.endsWith("i") || romanNumeral.endsWith("I")) {					
+					lessThan = i;
+				} else if (romanNumeral.endsWith("v") || romanNumeral.endsWith("V")) {
+					lessThan = v;
+				} else if (romanNumeral.endsWith("x") || romanNumeral.endsWith("X")) {
+					lessThan = x;
+				} else if (romanNumeral.endsWith("l") || romanNumeral.endsWith("L")) {
+					lessThan = l;
+				} else if (romanNumeral.endsWith("c") || romanNumeral.endsWith("C")) {
+					lessThan = c;
+				} else if (romanNumeral.endsWith("d") || romanNumeral.endsWith("D")) {
+					lessThan = d;
+				} else if (romanNumeral.endsWith("m") || romanNumeral.endsWith("M")) {
+					lessThan = m;
+				} //less than if
+					
+				sum = 0;
+				
+				//For loop that actually does the conversion
+				for(length1=romanNumeral.length(); length1>0; length1--) {
+					letter = romanNumeral.charAt(length1-1);
+						
+					//Sets the value of the letter
+					if (letter == 'i' || letter == 'I') {
+						letterValue = i;
+					} else if (letter == 'v' || letter == 'V') {
+						letterValue = v;
+					} else if (letter == 'x' || letter == 'X') {
+						letterValue = x;
+					} else if (letter == 'l' || letter == 'L') {
+						letterValue = l;
+					} else if (letter == 'c' || letter == 'C') {
+						letterValue = c;
+					} else if (letter == 'd' || letter == 'D') {
+						letterValue = d;
+					} else if (letter == 'm' || letter == 'M') {
+						letterValue = m;
+					}//Letter value if
+					
+					//If letter value should be negative, sets it to its negative counterpart. 
+					//Else, sets the value as the new lessThan
+					if (letterValue < lessThan) {
+						letterValue -= (letterValue * 2);
+					} else if (letterValue > lessThan) {
+						lessThan = letterValue;
+					}//negative if loop
+					
+					//Setting the sum to include the new value, and setting the string to exclude the value just converted
+					sum += letterValue;
+					romanNumeral = romanNumeral.substring(0, (length1-1));
+				}//Roman numeral to decimal for loop
+					
+				//Printing the results of the conversion
+				System.out.println("The base 10 equivalent of " + romanNumeralOG.toUpperCase() + " is " + sum + "\n");
+				
+				//Asking the user if they want to convert the Roman numeral to other bases
+				System.out.print("Would you like to convert your Roman numeral to another base?" 
+						+ " \n(Please answer with TRUE for yes and FALSE for no)");
+				convert = input.nextBoolean();
+				
+				//If the user replies true, then the while loop is initiated
+				while (convert == true) {
+					//Do-while loop to make sure the user enters a valid base to convert to
+					do {
+						System.out.println("\nPlease choose a base between 2 and 16 (excluding 10) to convert to, " 
+								+ "and type it in. Or, enter 0 to exit.");
+						System.out.print("Choice: ");
+						convertBase = input.nextInt();
+					} while (convertBase < 0 || convertBase == 10 || convertBase > 16);
+					
+					//If the user enters 0 (exit key), changes the while loop boolean to stop the loop from running. 
+					//Else, conversion proceeds
+					if (convertBase == 0) {
+						convert = false;
+					} else if (convertBase > 10) {
+						//If the desired base is greater than 10
+						decimal = sum;
+						multiplier = 1;
+						converted = 0;
+						hexaConverted = " ";
+						
+						//Basic conversion code (recycled from Number Systems work) updated for hexadecimal
+						while (decimal > 0) {
+							wholeNumber = decimal / convertBase;
+							remainder = decimal % convertBase;
+							if (remainder == 10) {
+								hexaValue = 'A';
+								hexaConverted = hexaValue + hexaConverted;
+							} else if (remainder == 11) {
+								hexaValue = 'B';
+								hexaConverted = hexaValue + hexaConverted;
+							} else if (remainder == 12) {
+								hexaValue = 'C';
+								hexaConverted = hexaValue + hexaConverted;
+							} else if (remainder == 13) {
+								hexaValue = 'D';
+								hexaConverted = hexaValue + hexaConverted;
+							} else if (remainder == 14) {
+								hexaValue = 'E';
+								hexaConverted = hexaValue + hexaConverted;
+							} else if (remainder == 15) {
+								hexaValue = 'F';
+								hexaConverted = hexaValue + hexaConverted;
+							} else {
+								hexaConverted = remainder + hexaConverted;
+							}
+								
+							decimal = wholeNumber;
+						}//hexa conversion while loop
+						
+						//Printing the hexadecimal conversion
+						System.out.println("The base " + convertBase + " equivalent of " + romanNumeralOG.toUpperCase() + " is " + hexaConverted);
+							
+					} else if (convertBase >=2 && convertBase <= 9) {
+						//The other bases available - 2 through 9
+						decimal = sum;
+						multiplier = 1;
+						converted = 0;
+						
+						//Recycled number systems code, desired base changed to a variable for simplicity
+						while (decimal > 0) {
+							wholeNumber = decimal / convertBase;
+							remainder = decimal % convertBase;
+							//Multiplying the remainder by the multiplier and adding the result to the binary total
+							remainder *= multiplier;
+							converted += remainder;
+							//Setting up the next round of math
+							multiplier *= 10;
+							decimal = wholeNumber;
+						}//converting less than 10 while
+						
+						//Printing the binary/octal result
+						System.out.println("The base " + convertBase + " value of " 
+								+ romanNumeralOG.toUpperCase() + " is " + converted);
+						
+					}//further converting if
+						
+				}//Other conversion while loop
+					
+			}//exit if loop
+				
+		}//conversion while loop
+		
+		//Farewell message when user exits the program
+		System.out.println("Goodbye!");
+		
+		input.close();
+	}
+}
