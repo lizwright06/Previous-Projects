@@ -1,0 +1,70 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: May 29, 2022
+ * Date Finished: June 15, 2022
+ * Description: Holds the hallway with the artifacts
+ */
+
+public class Hallways {
+	
+	String[][] hallway;
+	
+	/*
+	 * Pre: none
+	 * Post: initialized hallway
+	 * Description: initializes hallway with hardcoded artifact names
+	 */
+	public Hallways() {
+		
+		//allocating space
+		hallway = new String[19][2];
+		
+		//initializing all the elements
+		for(int i=0; i<hallway.length; i++) {
+			
+			for(int a=0; a<hallway[i].length; a++) {
+				hallway[i][a] = "";
+			
+			}
+			
+		}
+		
+		//hardcoding artifacts where they're supposed to go
+		hallway[0][0] = "Quest Stones";
+		hallway[1][0] = "Portal Star";
+		hallway[2][1] = "Gold Chest";
+		hallway[3][0] = "Lantern";
+		hallway[3][1] = "Freezing Book of Spells";
+		hallway[4][0] = "Portal Chest";
+		hallway[4][1] = "Tree Owl (check)";
+		hallway[5][1] = "Snowflakes";
+		hallway[6][0] = "Green Chest";
+		hallway[7][1] = "Man in the Stump (check)";
+		hallway[8][0] = "Hourglass";
+		hallway[8][1] = "Icicle Frost";
+		hallway[9][0] = "Gold Chest";
+		hallway[10][1] = "Dragon Painting";
+		hallway[11][0] = "Hawk Claw";
+		hallway[11][1] = "Lady in the Wall (check)";
+		hallway[12][1] = "Gold Chest";
+		hallway[13][0] = "Fairy Painting";
+		hallway[14][0] = "Tree Man (check)";
+		hallway[15][1] = "Dragon Scales";
+		hallway[16][0] = "Gold Chest";
+		hallway[17][1] = "Talking Tree";
+		hallway[18][0] = "Charlock's Cave";
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: 2D String array containing the hallway
+	 * Description: returns the hallway
+	 */
+	public String[][] getHall() {
+		//returns hallway
+		return hallway;
+		
+	}
+	
+}

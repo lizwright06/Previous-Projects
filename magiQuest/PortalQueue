@@ -1,0 +1,91 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: June 1, 2022
+ * Date Finished: June 15, 2022
+ * Description: Holds clues for the Portal Rune quest
+ */
+
+public class PortalQueue extends Queue {
+	
+	
+	/*
+	 * Pre: none
+	 * Post: variables initialized
+	 * Description: constructors
+	 */
+	public PortalQueue() {
+		//initializes variables
+		super(-1, -1, 5, new String[5]);
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: queue is initialized
+	 * Description: enqueues all the clues
+	 */
+	public void initialEnqueue() {
+		
+		//enqueues the clue for Artifact 1
+		enqueue("\n\tA golden opportunity\n" + 
+				"\tTo find that precious stuff\n" + 
+				"\tRequires you but to\n" + 
+				"\tLook around, easily enough");
+		
+		//enqueues the clue for Artifact 2
+		enqueue("\n\tTwinkle, twinkle, Portal Star\n" + 
+				"\tHow high above the Realm you are\n" + 
+				"\tAnd watching over everything.\n" + 
+				"\tWhat magic does FIVE sparkles bring?");
+		
+		//enqueues the clue for Artifact 3
+		enqueue("\n\tThe Artifact Hall is home to vines\n" + 
+				"\tthat twirl and twist and intertwine.\n" + 
+				"\tthe Portal Chest makes its home there too,\n" + 
+				"\tso walk six steps down this avenue.");
+		
+		//enqueues the clue for Artifact 4
+		enqueue("\n\tTwinkle, twinkle, Portal Star\n" + 
+				"\thow you shimmer from afar\n" + 
+				"\tcast FIVE times, again up high\n" + 
+				"\tand see just where your magic lies.");
+		
+		//enqueues the clue for Artifact 5
+		enqueue("\n\tYou've completed the tasks on the quest you're pursuing,\n" + 
+				"\tand proved you must know what you're doing.\n" + 
+				"\tNow haste to the Lady in the Wall\n" + 
+				"\tamong the Artifacts of the Hall.");
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: the general clue for the Rune
+	 * Description: returns the general clue
+	 */
+	public String getGeneralClue() {
+		
+		//returns general clue
+		return "\n\tTo conquer this task, be daring and bold.\n" + 
+				"\tSet out by first finding one-thousand gold.\n" + 
+				"\tThen seek out the Portal Star right where it sits\n" + 
+				"\tAnd FIVE times enchant\n" + 
+				"\twith your wand and your wits!\n" + 
+				"\tEnchant next the portal chest hiding afar\n" + 
+				"\tThen FIVE times again you’ll enchant the same star.\n" + 
+				"\tAnd if you achieve this, and if you stand tall\n" + 
+				"\tYour last destination is the Lady in the Wall.";
+		
+	}
+
+	/*
+	 * Pre: none
+	 * Post: string containing the data piece
+	 * Description: calls on super dequeue
+	 */
+	public String dequeue() {
+		//calls on super dequeue
+		return super.dequeue();
+	}
+	
+}

@@ -1,0 +1,76 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: June 14, 2022
+ * Date Finished: June 15, 2022
+ * Description: Draws opening "Magi Quest" title frame
+ */
+
+import java.awt.*;
+import java.awt.geom.*;
+import javax.swing.*;
+public class DrawingCanvas extends JComponent {
+
+	int width, height;
+	
+	/*
+	 * Pre: w containing width, h containing height
+	 * Post: variables initialized
+	 * Description: constructor
+	 */
+	public DrawingCanvas(int w, int h) {
+		width = w;
+		height = h;
+	}
+	
+	/*
+	 * Pre: g containing graphics object
+	 * Post: graphics window open
+	 * Description: prints the graphics window
+	 */
+	protected void paintComponent(Graphics g) {
+		Graphics2D g2d = (Graphics2D) g;
+		
+		RenderingHints rh = new RenderingHints(
+				RenderingHints.KEY_ANTIALIASING, 
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		
+		g2d.setRenderingHints(rh);
+		
+		Rectangle2D.Double r = new Rectangle2D.Double(0, 0, width, height);
+		g2d.setColor(Color.BLACK);
+		g2d.fill(r);
+		
+		//red layer
+		g2d.setColor(new Color(173, 15, 15));
+		
+		Font font = new Font("Serif", Font.BOLD, 75);
+		g2d.setFont(font);
+		g2d.drawString("MAGI QUEST", 40, 195);
+		
+		font = new Font("Serif", Font.BOLD, 25);
+		g2d.setFont(font);
+		g2d.drawString("A Game by Elizabeth Wright", 130, 240);
+		
+		font = new Font("Serif", Font.BOLD, 15);
+		g2d.setFont(font);
+		g2d.drawString("Adapted from Great Wolf Lodge's live-action game", 120, 265);
+		
+		//yellow layer
+		g2d.setColor(new Color (235, 228, 80));
+		
+		font = new Font("Serif", Font.BOLD, 75);
+		g2d.setFont(font);
+		g2d.drawString("MAGI QUEST", 35, 195);
+		
+		font = new Font("Serif", Font.BOLD, 25);
+		g2d.setFont(font);
+		g2d.drawString("A Game by Elizabeth Wright", 127, 240);
+
+		font = new Font("Serif", Font.BOLD, 15);
+		g2d.setFont(font);
+		g2d.drawString("Adapted from Great Wolf Lodge's live-action game", 117, 265);
+		
+		
+	}
+	
+}

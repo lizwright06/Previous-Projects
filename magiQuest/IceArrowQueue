@@ -1,0 +1,90 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: June 1, 2022
+ * Date Finished: June 15, 2022
+ * Description: Holds clues for the Ice Arrow Rune quest
+ */
+
+public class IceArrowQueue extends Queue {
+	
+	/*
+	 * Pre: none
+	 * Post: variables initialized
+	 * Description: constructors
+	 */
+	public IceArrowQueue() {
+		//initializes variables
+		super(-1, -1, 5, new String[5]);
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: queue is initialized
+	 * Description: enqueues all the clues
+	 */
+	public void initialEnqueue() {
+		
+		//enqueues the clue for Artifact 1
+		enqueue("\n\tBy the chills of December\n" + 
+				"\tthrough tempest storms tossed,\n" + 
+				"\tfind a forest that glistens\n" + 
+				"\twith icicle frost");
+		
+		//enqueues the clue for Artifact 2
+		enqueue("\n\tNo two are alike,\n" + 
+				"\tbut these are unique.\n" + 
+				"\tAt number eight\n" + 
+				"\tare the snowflakes you seek.");
+		
+		//enqueues the clue for Artifact 3
+		enqueue("\n\tTo the end of the Hall,\n" + 
+				"\tyou'll have to bound up,\n" + 
+				"\tif dragon scales\n" + 
+				"\tyou wish to round up.");
+		
+		//enqueues the clue for Artifact 4
+		enqueue("\n\tInto the depths of the Artifacts\n" + 
+				"\tyou'll have to bravely walk\n" + 
+				"\twith stealth and awe\n" + 
+				"\twithdraw the claw\n" + 
+				"\tbut beware the rest of the hawk!");
+		
+		//enqueues the clue for Artifact 5
+		enqueue("\n\tYou've found all the ingredients\n" + 
+				"\tand mixed them up at great expense,\n" + 
+				"\tnow to the Wise Old Owl repair,\n" + 
+				"\tshe's waiting for you, you have no time to spare!");
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: the general clue for the Rune
+	 * Description: returns the general clue
+	 */
+	public String getGeneralClue() {
+		
+		//returns general clue
+		return "\n\tHeed close the words\n" + 
+				"\tof the Questmaster's Tales,\n" + 
+				"\tSeek out the hawk's claw\n" + 
+				"\tand ice dragon scales,\n" + 
+				"\tLikewise the snowflakes\n" + 
+				"\tand icicles too,\n" + 
+				"\tThen seek out the nesting owl\n" + 
+				"\tto tell you who's whooo.";
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: string containing the data piece
+	 * Description: calls on super dequeue
+	 */
+	public String dequeue() {
+		//calls on super dequeue
+		return super.dequeue();
+	}
+	
+}

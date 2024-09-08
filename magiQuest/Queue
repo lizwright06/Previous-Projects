@@ -1,0 +1,112 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: June 14, 2022
+ * Date Finished: June 15, 2022
+ * Description: Queue class for Rune Quests/Charlock Adventure
+ */
+
+public class Queue {
+	
+	int rear, front, maxSize;
+	String[] clues;
+	
+	/*
+	 * Pre: r containing the rear, f containing the front, m containing the maxsize, c containing the clues
+	 * Post: variables initialized
+	 * Description: constructor
+	 */
+	public Queue(int r, int f, int m, String[] c) {
+		rear = r;
+		front = f;
+		maxSize = m;
+		clues = c;
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: string containing the front
+	 * Description: returns the front data piece
+	 */
+ 	public String front() {
+		//returns the front value
+		return clues[front];
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: string containing the data piece
+	 * Description: removes the front data piece, then requeues it
+	 */
+	public String dequeue() {
+		//dequeues the front value (then enqueues it)
+		front = (front+1) % 5;
+		
+		if(front == 0) {
+			clues = enqueue(clues[maxSize-1]);
+			return (clues[maxSize-1]);
+		} else {
+			clues = enqueue(clues[front-1]);
+			return clues[front-1];
+		}
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: clues containing data
+	 * Description: adds new data piece to the queue
+	 */
+	public String[] enqueue(String str) {
+		//enqueues a value
+		if (isEmpty()) {
+			rear = 0;
+			front = 0;
+			clues[rear] = str;
+		} else {
+			rear = (rear+1) % maxSize;
+			clues[rear] = str;
+		}
+		
+		return clues;
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: boolean containing whether the queue is empty or not
+	 * Description: returns whether the queue is empty or not
+	 */
+	public boolean isEmpty() {
+		//checks if the queue is empty
+		if (front == -1 && rear == -1) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: int containing the size
+	 * Description: returns the size of the queue
+	 */
+	public int size() {
+		//finds the size of the queue
+		if (isEmpty()) {
+			return 0;
+		} else {
+			return (rear-front+1);
+		}
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: queue “emptied”
+	 * Description: empties queue
+	 */
+	public void makeEmpty() {
+		//empties the queue
+		front = -1;
+		rear = -1;
+	}
+	
+}

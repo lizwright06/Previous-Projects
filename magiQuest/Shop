@@ -1,0 +1,388 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: May 29, 2022
+ * Date Finished: June 15, 2022
+ * Description: Determines what each artifact will "say" based on parameters given
+ */
+
+import java.util.Random;
+public class Messages extends Hallways {
+	
+	int artifact, rune, info, artifactNum;
+	
+	//rune number guide: portal = 1, freeze = 2, ice arrow = 3, protection = 4, adventure = 5
+	//info guide: 50, 75, 100, 125 or 150 = gold value, 1 = go to quest stones, 2 = checkpoint, 
+	//3 = artifact complete, 4 = portal star activated on portal rune quest, 5 = charlock's cave
+	
+	/*
+	 * Pre: none
+	 * Post: variables initialized
+	 * Description: initializes artifact, rune and info
+	 */
+	public Messages() {
+		//constructor
+		artifact = 0;
+		rune = 0;
+		info = 0;
+		artifactNum = 0;
+	}
+	
+	/*
+	 * Pre: a containing the Artifact number selected, r containing the Rune number, n containing the artifact number for the quest
+	 * Post: info containing the gold value or a number between 1 and 5 communicating various things
+	 * Description: determines which message should be printed based on the Artifact number and Rune quest
+	 */
+	public int message(int a, int r, int n) {
+		artifact = a;
+		rune = r;
+		artifactNum = n;
+		
+		if (artifact == 1) {
+			//quest stones
+			info = 1;
+			
+		} else if (artifact == 2) {
+			//portal star
+			
+			if(rune == 1) {
+				
+				//possible messages if it's the Portal Rune Quest
+				if(artifactNum == 2 || artifactNum == 4) {
+					System.out.print("\n" + super.hallway[1][0].toUpperCase() + ": You found the Portal Star!");
+				} else if (artifactNum == 1 || artifactNum == 3) {
+					System.out.print("\n" + super.hallway[1][0].toUpperCase() + ": A magi must complete their tasks in order.");
+				} else if (artifactNum == 5) {
+					System.out.print("\n" + super.hallway[1][0].toUpperCase() + ": You've already completed this task.");
+				}
+				
+				info = 4;
+			} else {
+				
+				//default message
+				System.out.println("\n" + super.hallway[1][0].toUpperCase() + ": **shimmer**");
+				
+			}
+			
+		} else if (artifact == 3) {
+			//gold chest
+			
+			//gold randomizer
+			info = goldRandom();
+			
+			//gold value print
+			System.out.println("\n" + "GOLD CHEST: You found " + info + " gold!");
+			
+		} else if (artifact == 4) {
+			//lantern
+			
+			//default message
+			System.out.println("\n" + super.hallway[3][0].toUpperCase() + ": You found the lantern.");
+			
+			if(rune == 2) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(1, artifactNum);
+				
+			}
+			
+		} else if (artifact == 5) {
+			//freezing book of spells
+			
+			//default message
+			System.out.println("\n" + super.hallway[3][1].toUpperCase() + ": You found the Freezing Book of Spells.");
+			
+			if(rune == 2) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(3, artifactNum);
+				
+			}
+			
+		} else if (artifact == 6) {
+			//portal chest
+			
+			//default message
+			System.out.println("\n" + super.hallway[4][0].toUpperCase() + ": You found the Portal Chest.");
+			
+			if(rune == 1) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(3, artifactNum);
+				
+			}
+			
+		} else if (artifact == 7) {
+			//tree owl + ice arrow
+			
+			if(rune == 3) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(5, artifactNum);
+				
+				System.out.print("\n" + super.hallway[4][1].substring(0,8).toUpperCase() + ": ");
+				
+			} else {
+				
+				//printing name
+				System.out.println("\n" + super.hallway[4][1].substring(0,8).toUpperCase());
+				
+				info = 2;
+			}
+			
+		} else if (artifact == 8) {
+			//snowflakes
+			
+			//default message
+			System.out.println("\n" + super.hallway[5][1].toUpperCase() + ": You found the Snowflake.");
+			
+			if(rune == 3) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(2, artifactNum);
+				
+			}
+			
+		} else if (artifact == 9) {
+			//green chest
+			
+			if(rune == 4) {
+				
+				//responses for the Rune this Artifact is associated with
+				System.out.println("\n" + super.hallway[4][0].toUpperCase() + ": You found the Crown of Protection!");
+				artifactRune(3, artifactNum);
+				
+			} else {
+
+				//gold randomizer
+				info = goldRandom();
+				
+				//gold value print
+				System.out.println("\n" + "GOLD CHEST: You found " + info + " gold!");
+				
+			}
+			
+		} else if (artifact == 10) {
+			//man in the stump + freeze
+			
+			if(rune == 2) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(5, artifactNum);
+				
+				System.out.print("\n" + super.hallway[7][1].substring(0,16).toUpperCase() + ": ");
+				
+			} else {
+				
+				//printing name
+				System.out.println("\n" + super.hallway[7][1].substring(0,16).toUpperCase());
+				info = 2;
+			}
+			
+		} else if (artifact == 11) {
+			//hourglass
+			
+			//default message
+			System.out.println("\n" + super.hallway[8][0].toUpperCase() + ": You found the sands of time, otherwise known as the Hourglass!");
+			
+			if(rune == 4) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(2, artifactNum);
+				
+			}
+			
+		} else if (artifact == 12) {
+			//icicle frost
+			
+			//default message
+			System.out.println("\n" + super.hallway[8][1].toUpperCase() + ": You found the icicles, burrrr");
+			
+			if(rune == 3) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(1, artifactNum);
+				
+			}
+			
+		} else if (artifact == 13) {
+			//gold chest
+			
+			//gold randomizer
+			info = goldRandom();
+			
+			//gold value print
+			System.out.println("\n" + "GOLD CHEST: You found " + info + " gold!");
+			
+		} else if (artifact == 14) {
+			//dragon painting
+			
+			//default message
+			System.out.println("\n" + super.hallway[10][1].toUpperCase() + ": You found the Dragon Painting.");
+			
+			if(rune == 5) {
+				
+				System.out.print("\nThe code to enter Charlock's cave is: ");
+				info = 3;
+				
+			}
+			
+		} else if (artifact == 15) {
+			//hawk claw
+			
+			//responses for the Rune this Artifact is associated with
+			System.out.println("\n" + super.hallway[11][0].toUpperCase() + ": You found the hawk's talon.");
+			
+			if(rune == 3) {
+				
+				//responses for current Rune
+				artifactRune(4, artifactNum);
+				
+			}
+			
+		} else if (artifact == 16) {
+			//lady in the wall + portal
+			
+			if(rune == 1) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(5, artifactNum);
+				
+				System.out.print("\n" + super.hallway[11][1].substring(0,16).toUpperCase() + ": ");
+				
+			} else {
+				
+				//printing name
+				System.out.println("\n" + super.hallway[11][1].substring(0,16).toUpperCase());
+				info = 2;
+				
+			}
+			
+		} else if (artifact == 17) {
+			//gold chest
+
+			//gold randomizer
+			info = goldRandom();
+			
+			//gold value print
+			System.out.println("\n" + "GOLD CHEST: You found " + info + " gold!");
+			
+		} else if (artifact == 18) {
+			//fairy painting
+			
+			//default message
+			System.out.println("\n" + super.hallway[13][0].toUpperCase() + ": *giggle* You found the fairies!");
+			
+			if(rune == 2) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(4, artifactNum);
+				
+			}
+			
+		} else if (artifact == 19) {
+			//tree dude + protection
+			
+			if(rune == 4) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(4, artifactNum);
+				
+				System.out.print("\n" + super.hallway[14][0].substring(0,8).toUpperCase() + ": ");
+				
+			} else {
+				
+				//printing name
+				System.out.println("\n" + super.hallway[14][0].substring(0,8).toUpperCase());
+				info = 2;
+			}
+		} else if (artifact == 20) {
+			//dragon scales
+			
+			//default message
+			System.out.println("\n" + super.hallway[15][1].toUpperCase() + ": You found the dragon scales!");
+			
+			if(rune == 3) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(3, artifactNum);
+				
+			}
+			
+		} else if (artifact == 21) {
+			//gold chest
+			
+			//gold randomizer
+			info = goldRandom();
+			
+			//gold value print
+			System.out.println("\n" + "GOLD CHEST: You found " + info + " gold!");
+			
+		} else if (artifact == 22) {
+			//talking tree
+			
+			//default message
+			System.out.println("\n" + super.hallway[17][1].toUpperCase() + ": I'm the talking tree! You found me!");
+			
+			if(rune == 2) {
+				
+				//responses for the Rune this Artifact is associated with
+				artifactRune(2, artifactNum);
+				
+			}
+			
+		} else if (artifact == 23) {
+			//Charlock's cave
+			info = 5;
+		}
+		
+		
+		return info;
+	}
+	
+	/*
+	 * Pre: searchingFor holding the artifact number associated with the Artifact
+	 * Post: a message printed
+	 * Description: prints a message for the user based on where the Artifact is in relation to the current Artifact required
+	 */
+	public void artifactRune(int searchingFor, int a) {
+		artifactNum = a;
+		
+		if(artifactNum == searchingFor) {
+			
+			//artifact found/completed
+			System.out.println("\nQUEST: Artifact " + artifactNum + " complete!");
+			info = 3;
+		
+		} else if (artifactNum > searchingFor) {
+			
+			//artifact already completed
+			System.out.println("\nQUEST: You've already completed this task.");
+		
+		} else if (artifactNum < searchingFor) {
+		
+			//artifact in wrong order
+			System.out.println("\nQUEST: A Magi must complete their tasks in order.");
+		
+		}
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: gold containing the amount of gold inside a Gold Chest
+	 * Description: randomizes the amount of gold found in a Gold Chest
+	 */
+	public int goldRandom() {
+		Random rand = new Random();
+		int gold, multiplier;
+		
+		//randomizes gold multiplier
+		multiplier = rand.nextInt(5) + 2;
+		
+		//finds gold amount
+		gold = 25*multiplier;
+		
+		return gold;
+		
+	}
+}

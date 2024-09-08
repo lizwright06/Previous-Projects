@@ -1,0 +1,83 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: June 1, 2022
+ * Date Finished: June 15, 2022
+ * Description: Holds clues for the Protection Rune quest
+ */
+
+public class ProtectionQueue extends Queue {
+	
+	/*
+	 * Pre: none
+	 * Post: variables initialized
+	 * Description: constructors
+	 */
+	public ProtectionQueue() {
+		//initializes variables
+		super(-1, -1, 4, new String[4]);
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: queue is initialized
+	 * Description: enqueues all the clues
+	 */
+	public void initialEnqueue() {
+		
+		//enqueues the clue for Artifact 1
+		enqueue("\n\tOne-thousand gold you seek to find?\n" + 
+				"\tIf you are brave and so inclined\n" + 
+				"\tthen be persistent, wise and bold,\n" + 
+				"\tand you'll discover chests of gold!");
+		
+		//enqueues the clue for Artifact 2
+		enqueue("\n\tThe middle of the Hall would be the place\n" + 
+				"\tto find an hourglass and embrace\n" + 
+				"\tits charms, but surely heed the chime,\n" + 
+				"\tAnd, Magi, don't run out of time!");
+		
+		//enqueues the clue for Artifact 3
+		enqueue("\n\tThis green regal chest,\n" + 
+				"\troyal craftsmen designed it.\n" + 
+				"\tLook two numbers up,\n" + 
+				"\tyou surely will find it.");
+		
+		//enqueues the clue for Artifact 4
+		enqueue("\n\tWhen all of these objects are in your collection,\n" + 
+				"\tthe Tree Man will grant the rune of protection.\n" + 
+				"\tDown the hall you surely will see\n" + 
+				"\ta man who grows tree-mendously!");
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: the general clue for the Rune
+	 * Description: returns the general clue
+	 */
+	public String getGeneralClue() {
+		
+		//returns general clue
+		return "\n\tOne-thousand gold pieces\n" + 
+				"\trequire your collection.\n" + 
+				"\tThen seek out the chest\n" + 
+				"\twhere the Crown of Protection\n" + 
+				"\tIs hidden; the hourglass\n" + 
+				"\twill give assistance\n" + 
+				"\tAnd lead, but be careful\n" + 
+				"\tand please keep your distance!";
+		
+	}
+
+	/*
+	 * Pre: none
+	 * Post: string containing the data piece
+	 * Description: calls on super dequeue
+	 */
+	public String dequeue() {
+		//calls on super dequeue
+		return super.dequeue();
+	}
+	
+}

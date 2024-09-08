@@ -1,0 +1,149 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: June 10, 2022
+ * Date Finished: June 15, 2022
+ * Description: The user can battle Charlock, the dragon that's terrorizing the realm
+ */
+
+import java.util.Random;
+public class CharlockBattle extends Queue {
+	
+	int userHP, dragonHP;
+	
+	/*
+	 * Pre: none
+	 * Post: variables initialized
+	 * Description: constructors
+	 */
+	public CharlockBattle() {
+		super(-1, -1, 3, new String[3]);
+		userHP = 1600;
+		dragonHP = 1600;
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: queue is initialized
+	 * Description: enqueues all the clues
+	 */
+	public void initialEnqueue() {
+		
+		enqueue("\n\tMemorize the order of the Dragon Painting's magic symbols,\n" + 
+				"\tfor to know this certain order is essential\n" + 
+				"\treturn to Charlocks Cave\n" + 
+				"\twith this order in your mind,\n" + 
+				"\tprepared to demonstrate your true potential!");
+		
+		enqueue("\n\tOnce you approach the dragon's lair\n" + 
+				"\tcast the symbols to get in,\n" + 
+				"\tfollow their proper order, and recall your training, \n" + 
+				"\tremember when you gained the trusty Portal Rune.");
+		
+		enqueue("\n\tThat dragon slumbers meek and mild,\n" + 
+				"\tto battle, you must wake it,\n" + 
+				"\tso cast at it now, my child,\n" + 
+				"\topportunity roars, so take it!\n" +  
+				"\tAgain, the right order for casting is crucial!\n" + 
+				"\tFind the sequence! Strike steady and true!\n" + 
+				"\tTiming's essential! Be forceful and truthful!\n" + 
+				"\tAnd victory's for certain, you dragon slayer you!");
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: the general clue for the Rune
+	 * Description: returns the general clue
+	 */
+	public String getGeneralClue() {
+		
+		return("\n\tCharlock the Dragon has just been released!\n" + 
+				"\tHe aims to destroy Vellara!\n" + 
+				"\tDuel to the finish this fire-breathing beast,\n" + 
+				"\tAnd prove that your skills are the best!");
+		
+	}
+	
+	/*
+	 * Pre: runeCount containing the number of each rune a user has
+	 * Post: boolean for whether they can battle Charlock or not
+	 * Description: checks to make sure that the user has one of each rune before being able to battle Charlock
+	 */
+	public boolean battleCheck(int[] runeCount) {
+		
+		for(int i=0; i<4; i++) {
+			if(runeCount[i] == 0) {
+				return false;
+			}
+		}
+		
+		return true;
+		
+	}
+	
+	/*
+	 * Pre: user containing the user’s HP, including any extra health from a topper
+	 * Post: userHP set to user
+	 * Description: user set to userHP
+	 */
+	public void setUserHP(int user) {
+		userHP = user;
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: int containing the user’s HP
+	 * Description: returns the user’s HP
+	 */
+	public int getUserHP() {
+		return userHP;
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: int containing Charlock’s HP
+	 * Description: returns Charlock’s HP
+	 */
+	public int getCharlockHP() {
+		return dragonHP;
+	}
+	
+	/*
+	 * Pre: multiplier containing the multiplier for the user’s attack against Charlock
+	 * Post: Charlock’s health depleted
+	 * Description: user attacks Charlock
+	 */
+	public void userAttack(double multiplier) {
+		Random rand = new Random();
+		int attackValue = (rand.nextInt(3) + 4)*100;
+		
+		dragonHP -= attackValue;
+		
+	}
+	
+	/*
+	 * Pre: protect containing whether the user protected themselves, multiplier containing the multiplier for Charlock’s attack
+	 * Post: user’s health depleted
+	 * Description: Charlock attacks user
+	 */
+	public void charlockAttack(boolean protect, double multiplier) {
+		
+		if(protect) {
+			userHP -= 200*multiplier;
+		} else {
+			userHP -= 400*multiplier;
+		}
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: string containing the data piece
+	 * Description: calls on super dequeue
+	 */
+	public String dequeue() {
+		//calls on super dequeue
+		return super.dequeue();
+	}
+	
+}

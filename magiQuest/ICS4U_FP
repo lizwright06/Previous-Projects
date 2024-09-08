@@ -1,0 +1,1681 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: May 28
+ * Date Finished: June 15, 2022
+ * Description: User has to gather Runes in order to defeat the dragon, Charlock
+ */
+
+import java.util.*;
+import javax.swing.*;
+import java.io.*;
+public class ICS4U_FP {
+	
+	//basic tracking values for various things in the code
+	static int rune = 0, gold, goldCounter = 0, artifactNum = 0, portalStarCount = 0;
+	static String username, charlockCode = "";
+	static int[] runeCount = new int[4];
+	static boolean hasCharlockCode = false, newUser = false;
+	
+	//rune guide (for runeCount): portal=0, freeze=1, arrow=2, protection=3
+	//rune guide (for everything else): portal=1, freeze=2, arrow=3, protection=4
+	
+	//topper-related declarations
+	static Topper[] toppers = new Topper[0];
+	static int topperLength = 0;
+	
+	//Quest/Adventure object declarations
+	static PortalQueue portal = new PortalQueue();
+	static FreezeQueue freeze = new FreezeQueue();
+	static IceArrowQueue ice = new IceArrowQueue();
+	static ProtectionQueue protection = new ProtectionQueue();
+	static CharlockBattle battle = new CharlockBattle();
+	
+	/*
+	 * Pre: none
+	 * Post: game complete
+	 * Description: controls where the game goes
+	 */
+	public static void main(String[] args) {
+		Scanner input = new Scanner(System.in);
+		boolean exit = false, loggedIn = false;;
+		int current = 0;
+		String[] locations = {"QUEST STONES", "ARTIFACT HALL", "CHARLOCK'S CAVE", "SHOP"};
+		portal.initialEnqueue();
+		freeze.initialEnqueue();
+		ice.initialEnqueue();
+		protection.initialEnqueue();
+		battle.initialEnqueue();
+		
+		openingGraphics(true);
+		
+		//initializes runeCount to avoid null exceptions
+		for(int i=0; i<4; i++) {
+			runeCount[i] = 0;
+		}
+		
+		//logs the user in
+		do {
+			loggedIn = intro(input);
+		} while (!loggedIn);
+		
+		//gets progress
+		getProgress();
+		
+		System.out.println("\n-------------------------------------------------------------------------------------"
+							+ "----------------------------------------------------------\n");
+		
+		//quick introduction
+		System.out.println("Welcome to Vellara, " + username + "! Your arrival is highly anticipated."
+						+ "\nThe dragon, Charlock, is terrorizing the Realm! We need your help to defeat him,"
+						+ "\nso you need to collect Runes so you can duel him!");
+		
+		//tells user at look at tutorial if they are new
+		if(newUser) {
+			System.out.println("\nIt looks like this is your first time playing. Head over to the Tutorial!");
+		}
+		
+		//continues previous quest if the user was on one
+		if(artifactNum != 0 && rune != 0) {
+			
+			runeStart(1, input);
+			
+		}
+		
+		while (!exit) {
+			
+			//exits
+			if (current == 4) {
+				System.out.println("\nSaving progress, please wait...");
+				saveProgress();
+				
+				exit = true;
+			} else {
+				
+				//prints current location
+				System.out.print("\nCURRENT LOCATION: " + locations[current]);
+				
+				if(current == 0) {
+					//goes to/calls on quest stones
+					current = questStones(input);
+				} else if (current == 1) {
+					//goes to/calls on artifact hall
+					current = artifactHall(input);
+				} else if (current == 2) {
+					//goes to/calls on charlock's cave
+					current = charlocksCave(input);
+				} else if (current == 3) {
+					//goes to/calls on shop
+					current = shop(input);
+				}
+				
+			}
+			
+		}
+		
+		System.out.println("\nGoodbye, Magi! We eagerly await your return!");
+		
+		openingGraphics(false);
+	}
+	/*
+	 * Pre: none
+	 * Post: opening graphics opened
+	 * Description: opens a pop-up that has game title, my name, and GWL credit
+	 */
+	public static void openingGraphics(boolean beginning) {
+		int width = 640, height = 400;
+		DrawingCanvas dC = new DrawingCanvas(width, height);
+		
+		JFrame intro = new JFrame();
+		//creates & paints graphics window
+		intro.setSize(width,height);
+		intro.setTitle("Welcome to Magi Quest!");
+		intro.add(dC);
+		intro.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		intro.setVisible(true);
+		
+		if(beginning) {
+			//enter code
+			System.out.println("(click here and press enter)");
+			enterCode();
+			//removes graphics window
+			intro.setVisible(false);
+			intro.dispose();
+		}
+		
+		
+	}
+	
+	/*
+	 * Pre: input containing the scanner
+	 * Post: boolean loggedIn containing whether the user was logged in or not
+	 * Description: allows the user to create an account/log in
+	 */
+	public static boolean intro(Scanner input) {
+		int choice = 0, compare = -1;
+		String pass;
+		boolean loggedIn = false;
+		File passFile = new File("passwords.txt");
+		Password[] login;
+		
+		System.out.println("Welcome to Magi Quest! Are you a: ");
+		
+		do {
+			
+			//asks user to pick between new user (make account) and returning user (logging in)
+			System.out.println("\n[1] New user\n[2] Returning user");
+			System.out.print("Your choice: ");
+			choice = input.nextInt();
+			
+			if(passFile.exists()) {
+				
+			} else if (choice == 2) {
+				
+				//makes sure that the user picks new user if there are no accounts
+				choice = 3;
+				System.out.println("\nNo accounts currently exist. Please select new user.");
+				
+			}
+			
+		} while (choice > 2 || choice < 1);
+		
+		if(passFile.exists()) {
+			//reads accounts if they exist
+			login = readAccounts(passFile);
+		} else {
+			//creates one new account if there's not one
+			login = new Password[1];
+		}
+		
+		if (choice == 1) {
+			//making a new account
+			
+			//entering username
+			System.out.print("\nEnter a username (no spaces): ");
+			username = input.next();
+			
+			//making sure the account does not already exist
+			if (passFile.exists()) {
+				for(int i = 0; i<login.length || !passFile.exists(); i++) {
+					
+					if(login[i].getUser().equalsIgnoreCase(username)) {
+						System.out.println("\nAn account for this username already exists.\n");
+						return false;
+					}
+					
+				}
+				
+			}
+			
+			//picking a password
+			System.out.print("Enter a password (no spaces): ");
+			pass = input.next();
+			
+			//adding account info to the array of objects
+			if(passFile.exists()) {
+				login = addAccount(login, username, pass, login.length);
+			} else {
+				login[0] = new Password(username, pass);
+			}
+			
+			//user is logged in
+			newUser = true;
+			loggedIn = true;
+			
+		} else {
+			
+			//user enters username
+			System.out.print("\nEnter your username: ");
+			username = input.next();
+			
+			//looks for account
+			for(int i = 0; i<login.length; i++) {
+				
+				if(login[i].getUser().equalsIgnoreCase(username)) {
+					compare = i;
+				}
+				
+			}
+			
+			if(compare == -1) {
+				//if account could not be found
+				System.out.println("\nCould not find an account for that username.\n");
+			} else {
+				
+				//enters password until it matches the account password
+				System.out.print("Enter you password, " + username + " (0 to exit): ");
+				
+				do {
+					pass = input.next();
+					
+					if(pass.equals("0")) {
+						//allows the user to exit the password attempt
+						loggedIn = true;
+					} else if(pass.equalsIgnoreCase(login[compare].getPass())) {
+						System.out.println("\nLogin successful!");
+						loggedIn = true;
+					} else {
+						System.out.println("\nLogin unsuccessful, please try again: ");
+					}
+					
+				} while(!loggedIn);
+				
+				if(pass.equals("0")) {
+					//makes sure that the user doesn't get logged into an account if they wanted to exit
+					loggedIn = false;
+				}
+				
+			}
+			
+		}
+		
+		//saves password and gives the go-ahead to start the game
+		savePasswords(login, passFile, login.length);
+		return loggedIn;
+		
+	}
+	/*
+	 * Pre: passFile containing password file reference
+	 * Post: Password[] login containing the account logins
+	 * Description: reads the accounts from a file
+	 */
+	public static Password[] readAccounts(File passFile) {
+		
+		int numOfAccounts = 0;
+		Password[] login = new Password[0];
+		FileInputStream fRead;
+		ObjectInputStream read;
+		
+		try {
+			
+			//creating input streams
+			fRead = new FileInputStream(passFile);
+			read = new ObjectInputStream(fRead);
+			
+			//reading number of accounts and creating array of objects
+			numOfAccounts = read.readInt();
+			login = new Password[numOfAccounts];
+			
+			//reading objects
+			for(int i=0; i<numOfAccounts; i++) {
+				login[i] = (Password)read.readObject();
+			}
+			
+			//closing input streams
+			read.close();
+			fRead.close();
+			
+		} catch (FileNotFoundException e) {
+			//FileNotFoundException catcher
+			System.out.println("File could not be found.");
+			System.out.println("FileNotFoundException: " + e.getMessage());
+		} catch (IOException e) {
+			//IOException catcher
+			System.out.println("Problem reading file.");
+			System.out.println("IOException: " + e.getMessage());
+		} catch (ClassNotFoundException e) {
+			//ClassNotFoundException catcher
+			System.out.println("Class could not be used to cast object.");
+			System.out.println("ClassNotFoundException: " + e.getMessage());
+		}
+		
+		return login;
+	}
+	/*
+	 * Pre: login containing accounts, user containing new username, pass containing new password 
+	 *      and numOfAccounts containing the number of accounts
+	 * Post: Password[] login containing account logins with new account added
+	 * Description: adds a new account to the login array of objects
+	 */
+	public static Password[] addAccount(Password[] login, String user, String pass, int numOfAccounts) {
+		
+		Password[] newLogin = new Password[numOfAccounts+1];
+		
+		//saving old login to new login
+		for(int i=0; i<numOfAccounts; i++) {
+			newLogin[i] = login[i];
+		}
+		
+		//creating new account
+		newLogin[numOfAccounts] = new Password(user, pass);
+		
+		System.out.println("\nAccount successfully created, " + user);
+		
+		return newLogin;
+	}
+	/*
+	 * Pre: login containing login information, passFile containing the reference to the password file, 
+	 *      numOfAcocunts containing the number of accounts
+	 * Post: login information saved to file
+	 * Description: saves account login details to file
+	 */
+	public static void savePasswords(Password[] login, File passFile, int numOfAccounts) {
+		
+		FileOutputStream fWrite;
+		ObjectOutputStream write;
+		
+		try {
+			fWrite = new FileOutputStream(passFile, false);
+			write = new ObjectOutputStream(fWrite);
+			
+			//writes number of accounts
+			write.writeInt(numOfAccounts);
+			
+			for(int i=0; i<numOfAccounts; i++) {
+				
+				//serializes object
+				write.writeObject(login[i]);
+				
+			}
+			
+			write.close();
+			fWrite.close();
+		} catch (FileNotFoundException e) {
+			//FileNotFoundException catcher
+			System.out.println("File could not be found.");
+			System.out.println("FileNotFoundException: " + e.getMessage());
+		} catch (IOException e) {
+			//IOException catcher
+			System.out.println("There was a problem writing to the file.");
+			System.out.println("IOException: " + e.getMessage());
+		}
+		
+	}
+	/*
+	 * Pre: none
+	 * Post: int rune, int gold, int artifactNum, int[] runeCount, Topper[] toppers and int topperLength written to current user file
+	 * Description: user progress saved by writing to file
+	 */
+	public static void saveProgress() {
+		File userFile = new File(username+".txt");
+		FileWriter out;
+		BufferedWriter writeFile;
+		
+		if(!userFile.exists()) {
+			
+			try {
+				//creates file for the user if it doesn't already exist
+				userFile.createNewFile();
+			} catch (IOException e) {
+				//IOException catcher
+				System.out.println("File could not be created.");
+				System.out.println("IOException: " + e.getMessage());
+			}
+			
+		}
+		
+		try {
+			
+			out = new FileWriter(userFile, false);
+			writeFile = new BufferedWriter(out);
+			
+			//writes runeCount to file
+			writeFile.write(runeCount[0]);
+			writeFile.newLine();
+			writeFile.write(runeCount[1]);
+			writeFile.newLine();
+			writeFile.write(runeCount[2]);
+			writeFile.newLine();
+			writeFile.write(runeCount[3]);
+			writeFile.newLine();
+			
+			//writes the current rune to file
+			writeFile.write(rune);
+			writeFile.newLine();
+			
+			//writes artifactNum to file
+			writeFile.write(artifactNum);
+			writeFile.newLine();
+			
+			//writes gold to file
+			writeFile.write(gold);
+			writeFile.newLine();
+			
+			//writes toppers to file
+			writeFile.write(topperLength);
+			
+			for(int i=0; i<toppers.length; i++) {
+				writeFile.newLine();
+				
+				//writes equipped status to make reading easier in the future
+				if(toppers[i].getEquipped()) {
+					writeFile.write("true");
+				} else {
+					writeFile.write("false");
+				}
+				
+				//writes the modifier
+				writeFile.newLine();
+				writeFile.write(toppers[i].getModifier());
+				
+				
+			}
+			
+			writeFile.close();
+			out.close();
+			
+		} catch (IOException e) {
+			System.out.println("Problem writing to file.");
+			System.out.println("IOException: " + e.getMessage());
+		}
+		
+		
+	}
+	/*
+	 * Pre: none
+	 * Post: int rune, int gold, int artifactNum, int[] runeCount, Topper[] toppers and int topperLength read from current user file
+	 * Description: user progress retrieved from fle
+	 */
+	public static void getProgress() {
+		File userFile = new File(username+".txt");
+		FileReader in;
+		BufferedReader readFile;
+		int current;
+		String str;
+		boolean currentEquip;
+		
+		if(!userFile.exists()) {
+			
+			try {
+				//makes a file if it doesn't already exist
+				userFile.createNewFile();
+			} catch (IOException e) {
+				//IOException catcher
+				System.out.println("File could not be created.");
+				System.out.println("IOException: " + e.getMessage());
+			}
+			
+		} else {
+			
+			try {
+				in = new FileReader(userFile);
+				readFile = new BufferedReader(in);
+				
+				//reads rune count values
+				runeCount[0] = readFile.read();
+				readFile.readLine();
+				runeCount[1] = readFile.read();
+				readFile.readLine();
+				runeCount[2] = readFile.read();
+				readFile.readLine();
+				runeCount[3] = readFile.read();
+				readFile.readLine();
+				
+				//reads the rune value
+				rune = readFile.read();
+				readFile.readLine();
+				
+				//reads the artifact value
+				artifactNum = readFile.read();
+				readFile.readLine();
+				
+				//reads the gold value
+				gold = readFile.read();
+				readFile.readLine();
+				
+				//reads the topper length value
+				topperLength = readFile.read();
+				readFile.readLine();
+				
+				if(topperLength < 0) {
+					topperLength = 0;
+				}
+				
+				toppers = new Topper[topperLength];
+				
+				//reads & initializes topper values
+				for(int i=0; i<topperLength && ((str=readFile.readLine()) != null); i++) {
+					current = readFile.read();
+					readFile.readLine();
+					
+					//checks if string read in the for line is for true/false
+					if(str.equalsIgnoreCase("false")) {
+						currentEquip = false;
+					} else {
+						currentEquip = true;
+					}
+					
+					//creates toppers element
+					if(current == 1) {
+						toppers[i] = new Topper("Protection", current, 0.85, currentEquip);
+					} else if (current == 2) {
+						toppers[i] = new Topper("Stronger Attack", current, 1.15, currentEquip);
+					} else if (current == 3) {
+						toppers[i] = new Topper("Extra Health", current, 100.00, currentEquip);
+					}
+					
+				}
+				
+				readFile.close();
+				in.close();
+				
+			} catch (FileNotFoundException e) {
+				//FileNotFoundException catcher
+				System.out.println("File could not be found or does not exist.");
+				System.out.println("FileNotFoundException: " + e.getMessage());
+			} catch (IOException e) {
+				//IOExcepion catcher
+				System.out.println("Problem reading file.");
+				System.out.println("IOException: " + e.getMessage());
+			}
+			
+		}
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: int current containing the current position
+	 * Description: gives user a menu and asks them to choose what to do
+	 */
+	public static int questStones(Scanner input) {
+		int choice = 0, current = 0;
+		
+		do {
+			
+			//user picks where they want to go
+			System.out.println("\n[1] Tutorial\n[2] Start Rune Quest\n[3] Artifact Hall\n[4] Lady in the Leaves (check)\n[5] Shop\n[6] Help\n[7] Log out");
+			System.out.print("Enter your choice: ");
+			choice = input.nextInt();
+		} while (choice > 7 || choice < 1);
+		
+		if(choice == 1) {
+			//tutorial for the user
+			tutorial();
+		} else if (choice == 2) {
+			//rune start/selection
+			runeStart(0, input);
+		} else if (choice == 3) {
+			//goes to artifact hall
+			current = 1;
+		} else if (choice == 4) {
+			//checkpoint
+			System.out.println("\nLADY IN THE LEAVES");
+			checkpoints();
+		} else if (choice == 5) {
+			//goes to shop
+			current = 3;
+		} else if (choice == 6) {
+			//help
+			help(input);
+		} else if (choice == 7) {
+			//log out/exit
+			current = 4;
+		}
+		
+		return current;
+		
+	}
+	/*
+	 * Pre: none
+	 * Post: none
+	 * Description: prints user stats (# of runes, current rune/Artifact number, amount of gold, topper equipped)
+	 */
+	public static void checkpoints() {
+		
+		//prints the various statistics
+		System.out.println("Runes: Portal Rune-" + runeCount[0] + " Freeze Rune-" + runeCount[1] 
+				+ " Ice Arrow Rune-" + runeCount[2] + " Rune of Protection-" + runeCount[3]);
+		System.out.println("Gold: " + gold);
+		System.out.print("Topper Equipped: ");
+		
+		if(topperLength == 0) {
+			System.out.println("none");
+		} else {
+			System.out.println(toppers[0].getName());
+		}
+		
+		System.out.println("Current Quest: " + runeName());
+		System.out.print("Artifacts: ");
+		
+		//prints the current artifact number
+		if(artifactNum == 0) {
+			System.out.print(artifactNum);
+		} else {
+			System.out.print(artifactNum-1);
+		}
+		
+		//makes sure the right denominator is printed
+		if(rune == 0) {
+			System.out.println("/0");
+		}else if(rune == 4) {
+			System.out.println("/4");
+		} else {
+			System.out.println("/5");
+		}
+		
+	}
+	/*
+	 * Pre: input containing the scanner
+	 * Post: user’s question is answered
+	 * Description: provides an FAQ page for the user to get help from, as well as answers to riddles for their current Rune
+	 */
+	public static void help(Scanner input) {
+		int qChoice = 0;
+		boolean exit = false;
+		
+		//quick intro
+		System.out.println("\nWelcome to Magi Quests' help system! Below are some FAQs about the game.\n"
+						+ "Enter the number next to the question to see the answer!");
+		
+		while (!exit) {
+			do {
+				
+				//asks user what their question is
+				System.out.println("\n[1] What is the Ancient Book of Wisdom?\n[2] What is an Artifact?\n[3] What is a Rune? How/why should I get them?\n"
+								+ "[4] Why do some artifacts have (check) next to them?\n[5] What is a topper and when/how are they used?\n"
+								+ "[6] I can't figure out what Artifact this clue is talking about\n[7] Exit FAQ");
+				System.out.print("Enter your choice: ");
+				qChoice = input.nextInt();
+				
+			} while (qChoice > 7 || qChoice < 1);
+			
+			if( qChoice == 1) {
+				
+				//tells user what the Ancient Book of Wisdom is
+				System.out.print("\nThe Ancient Book of Wisdom is where you get all the clues to find Artifacts on your Quests. Read through its contents carefully!\n(press enter)");
+				enterCode();
+				
+			} else if (qChoice == 2) {
+				
+				//tells user what an Artifact is
+				System.out.print("\nAn Artifact is an object that helps you get Runes. They can be found in the Artifact Hall.\n(press enter)"); 
+				enterCode();
+				
+			} else if (qChoice == 3) {
+				
+				//tells user what a Rune is
+				System.out.print("\nA Rune is what allows a Magi to cast spells. You can get them by going on Quests and finding artifacts, as directed by the Ancient Book of Wisdom." 
+								+ "\nYou need Runes to battle Charlock.\n(press enter)");
+				enterCode();
+				
+			} else if (qChoice == 4) {
+				
+				//tells user what a Checkpoint is
+				System.out.print("\nArtifacts that have (check) next to them are Checkpoints. They give you information about how much gold you have, how many Runes you have,\n"
+								+ "what topper you have equipped, and what Quest you're currently on. This will also be where you go to receive your Rune at the end of a Quest.\n(press enter)");
+				enterCode();
+				
+			} else if (qChoice == 5) {
+				
+				//tells user what a topper is
+				System.out.print("\nA topper is an object that gives you particular power-ups that are automatically applied when battling Charlock.\n" 
+								+ "You can buy toppers, equip a new topper, and see your toppers in the Shop.\n(press enter)");
+				enterCode();
+				
+			} else if (qChoice == 6) {
+				
+				//tells user where artifacts are based on what Rune they're doing
+				if(rune == 1) {
+					
+					System.out.println("\nArtifact 1: 1000 Gold (Gold Chests are Artifacts 3, 13, 17, and 21)" 
+							+ "\nArtifact 2: Portal Star (Artifact 2, pick 5 times)"
+							+ "\nArtifact 3: Portal Chest (Artifact 6)"
+							+ "\nArtifact 4: Portal Star (Artifact 2, pick 5 times)"
+							+ "\nArtifact 5: Lady in the Wall (Artifact 16)");
+					
+				} else if (rune == 2) {
+					
+					System.out.println("\nArtifact 1: Lantern (Artifact 4)" 
+							+ "\nArtifact 2: Talking Tree (Artifact 22)"
+							+ "\nArtifact 3: Freezing Book of Spells (Artifact 5)"
+							+ "\nArtifact 4: Fairy Painting (Artifact 18)"
+							+ "\nArtifact 5: Man in the Stump (Artifact 10)");
+					
+				} else if (rune == 3) {
+					
+					System.out.println("\nArtifact 1: Icicle Frost (Artifact 12)" 
+							+ "\nArtifact 2: Snowflakes (Artifact 8)"
+							+ "\nArtifact 3: Dragon Scales (Artifact 20)"
+							+ "\nArtifact 4: Hawk Claw (Artifact 15)"
+							+ "\nArtifact 5: Tree Owl (Artifact 7)");
+					
+				} else if (rune == 4) {
+					
+					System.out.println("\nArtifact 1: 1000 Gold (Gold Chests are Artifacts 3, 13, 17, and 21)" 
+							+ "\nArtifact 2: Hourglass (Artifact 11)"
+							+ "\nArtifact 3: Green Chest (Artifact 9)"
+							+ "\nArtifact 4: Tree Man (Artifact 19)");
+					
+				} else if (rune == 5) {
+					
+					System.out.println("\nPart 1: Dragon Painting (Artifact 14)" 
+							+ "\nPart 2: Go back to the Cave (Artifact 23)"
+							+ "\nPart 3: Create a portal (Portal Rune)"
+							+ "\nPart 4: PROTECT yourself (Rune of Protection)"
+							+ "\nPart 5: FREEZE Charlock (Freeze Rune)"
+							+ "\nPart 6: ATTACK Charlock (Ice Arrow Rune)");
+					
+				} else {
+					
+					System.out.println("\nYou are not currently on a Rune Quest.");
+					
+				}
+				
+				System.out.print("(press enter)");
+				enterCode();
+				
+			} else if (qChoice == 7) {
+				//exit+goodbye
+				exit = true;
+				System.out.print("\nHope you found the answers you needed!\n(press enter)");
+				enterCode();
+			}
+		}
+		
+	}
+	/*
+	 * Pre: none
+	 * Post: tutorial printed
+	 * Description: tells user how to play the game
+	 */
+	public static void tutorial() {
+		
+		//quick introduction
+		System.out.println("\nWelcome to the Magi Quest Tutorial!\n(press enter)");
+		enterCode();
+		System.out.println("The goal of the game is to collect all four Runes so you can use them against the dragon, Charlock.\n(press enter)");
+		enterCode();
+		System.out.println("What is a Rune, you ask? Well, first, lets get some other things out of the way.\n(press enter)");
+		enterCode();
+		
+		//Quest Stones explanation
+		System.out.println("The place you just came from is the Quest Stones. They're the central hub of the game.\n(press enter)");
+		enterCode();
+		System.out.println("If you ever don't know where you are, look at the top of the menu! It'll say what your current location is.\n(press enter)");
+		enterCode();
+		
+		//Artifact Hall/Artifact explanation
+		System.out.println("The second most important location is the Artifact Hall. It holds the objects that allow you to get Runes.\n(press enter)");
+		enterCode();
+		System.out.println("To look at an Artifact, enter the number next to it when prompted. This will give you a message from the Artifact,\nand an update on how your Quest is going.\n(press enter)");
+		enterCode();
+		System.out.println("Some Artifacts have (check) at the end of their name. This means that this Artifact is a checkpoint, which can give you your player stats.\n(press enter)");
+		enterCode();
+		System.out.println("Checkpoints will also grant you Runes at the end of your Quest.\n(press enter)");
+		enterCode();
+		
+		//Charlock's cave
+		System.out.println("At the end of the Artifact Hall (the 'Hall'), there's Charlock's cave. This is where you go to battle the dragon.\n(press enter)");
+		enterCode();
+		System.out.println("You can only battle Charlock once you have all four Runes. A Rune is something that allows you to cast a spell.\n(press enter)");
+		enterCode();
+		
+		//Runes
+		System.out.println("The Runes are: the Portal Rune, the Freeze Rune, the Ice Arrow Rune and the Rune of Protection.\n(press enter)");
+		enterCode();
+		System.out.println("You need to go on Quests to get Runes. You start a Quest by selecting option 2 in the Quest Stones.\n(press enter)");
+		enterCode();
+		System.out.println("When you start a Quest, you will be given two riddles - the first is a clue for the whole Quest, and the second is specific to the first Artifact.\n(press enter)");
+		enterCode();
+		System.out.println("These clues tell you which Artifact to pick, so read them carefully!\n(press enter)");
+		enterCode();
+		
+		//Help
+		System.out.println("If you ever need help with a clue, go to the Help section under the Quest Stones - your questions will be answered!\n(press enter)");
+		enterCode();
+		
+		//toppers
+		System.out.println("Some clues will require you to get 1000 gold. You can then use this gold in the Shop, which you access via the Quest Stones.\n(press enter)");
+		enterCode();
+		System.out.println("You can buy toppers, which give you extra power-ups in your battle against Charlock.\n(press enter)");
+		enterCode();
+		System.out.println("There are three toppers: Stronger Attack, Protection, and Extra Health. You can equip one at a time. All toppers can be managed from the Shop.\n(press enter)");
+		enterCode();
+		
+		//goodbye, look at Help for
+		System.out.print("Hope this tutorial helped! Checkout the Help section under the Quest Stones if you have any other questions!\n(press enter)");
+		enterCode();
+		
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: int current containing the current position
+	 * Description: gives user the Artifact Hall and asks them to choose which Artifact to look at
+	 */
+	public static int artifactHall(Scanner input) {
+		Hallways hall = new Hallways();
+		Messages mess = new Messages();
+		int choice = 0, info, current = 1;
+		
+		//prints hall
+		System.out.print("\n");
+		printHallRecurse(hall.getHall(), 0, 0, 1);
+		
+		do {
+			
+			//asks user which artifact they want to look at
+			System.out.print("Enter the number next to the artifact you want to look at: ");
+			choice = input.nextInt();
+			
+		} while (choice > 23 || choice < 1);
+		
+		//gets message & info from the Messages class
+		info = mess.message(choice, rune, artifactNum);
+		
+		if (info == 50 || info == 75 || info == 100 || info == 125 || info == 150) {
+			//if the user picked a chest
+			gold += info;
+			
+			if((rune == 4 || rune == 1)  && (artifactNum == 1)) {
+				//if it's currently a quest that requires 2000 gold
+				goldCounter += info;
+				System.out.println("You've found " + goldCounter + " gold towards this rune.");
+			}
+			
+			//makes sure the user sees the info about how much gold they found
+			System.out.print("(press enter)");
+			enterCode();
+			
+			if ((rune == 4 || rune ==1) && (artifactNum == 1) && goldCounter >= 1000) {
+				//if they've found the required gold for their quest
+				System.out.println("\nQUEST: Artifact 1 complete");
+				
+				System.out.println("\nSaving progress, please wait...\n");
+				saveProgress();
+				
+				goldCounter = 0;
+				artifactNum++;
+				getNewClue(input);
+			}
+			
+		} else if (info == 1) {
+			//goes to quest stones
+			current = 0;
+		} else if (info == 2) {
+			//checkpoint
+			checkpoints();
+		} else if (info == 3) {
+			//artifact complete
+			
+			if (rune == 4 && artifactNum == 4) {
+				//if the user just completed artifact 4 on the Rune of Protection
+				current = runeFinish(input);
+			} else if (rune == 5) {
+				//if the user is currently trying to battle Charlock
+				generateCharlockCode();
+				System.out.println(charlockCode);
+				System.out.print("(press enter)");
+				enterCode();
+				hasCharlockCode = true;
+				
+				System.out.println("\nGood job, Magi! Now: ");
+				
+				System.out.print(battle.dequeue() + "\n\t(press enter)");
+				enterCode();
+				
+			} else if (artifactNum == 5) {
+				//if the user just completed artifact 5 on any other quest
+				current = runeFinish(input);
+			} else {
+				//adds one to artifactNum and gets new clue
+				artifactNum++;
+				
+				System.out.println("\nSaving progress, please wait...\n");
+				saveProgress();
+				
+				getNewClue(input);
+			}
+			
+		} else if (info == 4) {
+			//portal star (only on Portal Rune Quest)
+			
+			//makes sure the user sees the message from the Star
+			System.out.print("(press enter)");
+			enterCode();
+			
+			//adds one to the count of Portal Stars
+			portalStarCount++;
+			
+			if(portalStarCount == 5) {
+				//prints message if Portal Star artifact is complete, resets count and gets new clue
+				mess.artifactRune(artifactNum, artifactNum);
+				artifactNum++;
+				portalStarCount = 0;
+				
+				System.out.println("\nSaving progress, please wait...\n");
+				saveProgress();
+				
+				getNewClue(input);
+				
+			}
+			
+		} else if (info == 5) {
+			//charlock's cave
+			current = 2;
+		}
+		
+		
+		return current;
+	}
+	/*
+	 * Pre: hallway containing the Artifact hall, row containing the row number, col containing the column number, and count containing the count
+	 * Post: either returning itself or 0
+	 * Description: prints the Artifact hall recursively
+	 */
+	public static int printHallRecurse(String[][] hallway, int row, int col, int count) {
+		
+		if(row < hallway.length && col == hallway[row].length-1) {
+			//if the current element is the last column in the row
+			
+			if(hallway[row][col].isEmpty()) {
+				//if the element is empty, print a new line
+				System.out.println();
+				return printHallRecurse(hallway, row+1, 0, count);
+			} else if (hallway[row][col-1].isEmpty()) {
+				//if the column before is empty, print 3 tabs, the number, and the Artifact
+				System.out.println("\t\t\t[" + count + "] " + hallway[row][col]);
+				return printHallRecurse(hallway, row+1, 0, count+1);
+			} else if (hallway[row][col-1].length() + 4 < 16) {
+				//if the column before has less than 12 characters, print 2 tabs, the number, and the Artifact
+				System.out.println("\t\t[" + count + "] " + hallway[row][col]);
+				return printHallRecurse(hallway, row+1, 0, count+1);
+			} else if (hallway[row][col-1].length() + 4 < 24) {
+				//if the column before has less than 20 characters, print 1 tab, the number, and the Artifact
+				System.out.println("\t[" + count + "] " + hallway[row][col]);
+				return printHallRecurse(hallway, row+1, 0, count+1);
+			}
+			
+		} else if (row < hallway.length && col < hallway[row].length) {
+			//if the current element NOT the last column in the row, or in a row that doesn't exist
+			
+			if(hallway[row][col].isEmpty()) {
+				//if the element is empty, just call on the next one
+				return printHallRecurse(hallway, row, col+1, count);
+			} else {
+				//if the element is not empty, prints the number and the Artifact
+				System.out.print("[" + count + "] " + hallway[row][col]);
+				return printHallRecurse(hallway, row, col+1, count+1);
+			}
+			
+			
+		}
+		
+		//if the printing of the 2D array is done
+		return 0;
+		
+	}
+	
+	/*
+	 * Pre: input containing the scanner
+	 * Post: int current containing the current location
+	 * Description: user can buy toppers, equip toppers and see their toppers
+	 */
+	public static int shop(Scanner input) {
+		Shop shop = new Shop(toppers);
+		boolean exit = false;
+		int choice = 0, current = 0, buyChoice, equipChoice = 0;
+		
+		while (!exit) {
+			
+			//picks from shop menu
+			do {
+				
+				System.out.println("\n[1] Buy a topper\n[2] Equip a topper\n[3] See your toppers\n[4] Exit shop");
+				System.out.print("Enter your choice: ");
+				choice = input.nextInt();
+				
+			} while (choice < 1 || choice > 4);
+			
+			if(choice == 1) {
+				
+				//asks the user which topper they want to buy
+				buyChoice = shop.stock(input);
+				if(buyChoice == 4) {
+					
+				} else if(gold >= 400) {
+					//buys the topper if the user can afford it
+					toppers = shop.buy(buyChoice);
+					System.out.println("\nYou just bought the " + toppers[topperLength].getName() + " topper for " + toppers[topperLength].getPrice() +" gold!");
+					
+					//subtracts gold and tells the user how much they have left
+					gold -= toppers[topperLength].getPrice();
+					System.out.println("You have " + gold + " gold left.\n");
+					
+					//changes topperLength and resorts the array
+					topperLength = toppers.length;
+					topperSort();
+					
+					enterCode();
+				} else {
+					//tells user they don't have enough gold
+					System.out.println("\nOh no, you don't have enough gold!");
+				}
+				
+			} else if (choice == 2) {
+				
+				if(topperLength == 0) {
+					System.out.println("You don't own any toppers! Buy some and then come back!");
+				} else {
+					
+					//displays the topper list
+					topperDisplay();
+					
+					do {
+						
+						//makes user pick which topper they want to equip
+						System.out.print("Enter the topper you want to equip: ");
+						equipChoice = input.nextInt();
+						
+					} while (equipChoice < 0 || equipChoice > topperLength);
+					
+					//equips new topper, unequips previous topper
+					toppers[0].setEquipped(false);
+					toppers[equipChoice].setEquipped(true);
+					
+					//resorts topper
+					topperSort();
+					
+					System.out.println("\nTopper equipped!");
+					
+				}
+				
+			} else if (choice == 3) {
+				//displays the topper
+				topperDisplay();
+				
+				System.out.println("\n");
+				
+			} else if (choice == 4) {
+				//exits back to the Quest Stones
+				exit = true;
+				current = 0;
+			}
+			
+		}
+		
+		return current;
+	}
+	/*
+	 * Pre: none
+	 * Post: Topper[] toppers sorted
+	 * Description: sorts toppers by equipped status (equipped at the top)
+	 */
+	public static void topperSort() {
+		int size = topperLength;
+	    
+		//loop to access each array element
+		for (int i = 0; i < size - 1; i++) {
+	    
+			//loop to compare array elements
+			for (int j = 0; j < size - i - 1; j++) {
+				//compare two adjacent elements
+				if (!toppers[j].getEquipped() && toppers[j + 1].getEquipped()) {
+					//swapping occurs if elements are not in the intended order
+					Topper temp = toppers[j];
+					toppers[j] = toppers[j + 1];
+					toppers[j + 1] = temp;
+					
+				}
+				
+			}
+			
+		}
+	}
+	/*
+	 * Pre: none
+	 * Post: Topper[] toppers printed
+	 * Description: prints toppers so that user can either see them or pick which one they want to equip
+	 */
+	public static void topperDisplay() {
+		
+		//table headings
+		System.out.println("\n    NAME\t\tMULTIPLIER\t\tEQUIPPED");
+		
+		for(int i=0; i<topperLength; i++) {
+			
+			//prints topper number and name
+			System.out.print("[" + i + "] " + toppers[i].getName() + "\t");
+			
+			//prints the multiplier
+			if (toppers[i].getModifier() == 1) {
+				System.out.print("\t15% less damage done");
+			} else if (toppers[i].getModifier() == 2) {
+				System.out.print("15% more attack damage");
+			} else if (toppers[i].getModifier() == 3) {
+				System.out.print("+100 hp\t\t");
+			}
+			
+			//prints the equipped status
+			System.out.println("\t" + toppers[i].getEquipped());
+			
+			
+		}
+		
+	}
+	
+	/*
+	 * Pre: input containing the scanner
+	 * Post: int current containing the current location
+	 * Description: controls the battle between the user and Charlock
+	 */
+	public static int charlocksCave(Scanner input) {
+		int current = 1, runeChoice = 0, postAttackMessage = 0;
+		boolean exit = false, enter = false, frozen, attack, charlockLost = false;
+		Random rand = new Random();
+		
+		if(!hasCharlockCode && rune != 5 && !battle.battleCheck(runeCount)) {
+			//makes sure the user has at least one of every rune
+			System.out.println("Sorry, you don't have all the runes you need to face Charlock!");
+			current = 1;
+		} else if (!hasCharlockCode && rune != 5 && battle.battleCheck(runeCount)) {
+			//starts the adventure quest with a clue and telling the user to get the code
+			rune = 5;
+			System.out.println("You are at the entrance to Charlock's cave, but you need a code to get in." 
+							+ "\nThe Ancient Book of Wisdom says: ");
+			
+			System.out.println(battle.getGeneralClue() + "\n\t(press enter)");
+			enterCode();
+			
+			System.out.println("The first step is: ");
+			
+			System.out.println(battle.dequeue() + "\n\t(press enter)");
+			enterCode();
+			
+			System.out.println("Good luck, Magi!");
+			
+			current = 1;
+			
+		} else if (!hasCharlockCode && rune == 5) {
+			System.out.println("You need to find the code, Magi!");
+		}
+		
+		if(hasCharlockCode && rune == 5) {
+			boolean equals = false;
+			String code;
+			
+			do {
+				
+				//user inputs code from painting
+				System.out.print("Enter the code to Charlock's cave: ");
+				code = input.next();
+				
+				//checks if the code is correct
+				if(code.equalsIgnoreCase(charlockCode)) {
+					equals = true;
+				} else {
+					System.out.println("Sorry, Magi, that's the wrong code. Please try again.");
+				}
+				
+			} while (!equals);
+			
+			//tells user they need a portal (*cough* portal rune *cough*) to get in
+			System.out.println("\nYou're almost inside Charlock's cave, Magi.\nYou need to generate a portal to enter!\n");
+			
+			do {
+				
+				do {
+					
+					//user picks the rune
+					System.out.println("PICK YOUR RUNE");
+					printRunes();
+					runeChoice = input.nextInt();
+					
+				} while (runeChoice > 4 || runeChoice < 1);
+				
+				//checks if rune is the right one
+				if(runeChoice == 1) {
+					enter = true;
+				} else {
+					System.out.println("Oops! That's not the right rune! Try again, Magi!");
+				}
+				
+			} while (!enter);
+			
+			System.out.println("\nYou have entered Charlock's Cave! He will wake up soon, so read quickly!");
+			
+			System.out.print(battle.dequeue()+"\n\t(press enter)");
+			enterCode();
+			
+			//applies health modifier from topper
+			if(topperLength != 0 && toppers[0].getModifier() == 3) {
+				battle.setUserHP(1600+toppers[0].getModifier());
+			}
+			
+			System.out.println("\nCHARLOCK: It's a Magi, coming to steal my treasure! Well then, let's see just how brave and smart you are! PREPARE TO DUEL!");
+			
+			printHealth();
+			
+			while(!exit) {
+				//charlock attacks
+				charlockAttack(input);
+				
+				//health prints
+				printHealth();
+				
+				if(battle.getUserHP() <= 0) {
+					exit = true;
+					charlockLost = false;
+				} else {
+					
+					//user freezes charlock
+					frozen = freezeCharlock(input);
+					
+					//user attacks charlock
+					attack = userAttack(input, frozen);
+					
+					//health prints
+					printHealth();
+					
+					//
+					if (attack && battle.getCharlockHP() > 0) {
+						postAttackMessage = rand.nextInt(2) + 1;
+						
+						if(postAttackMessage == 1) {
+							System.out.println("\nCHARLOCK: So you think you can defeat me with your silly little tricks! Meanwhile, I’m just getting warmed up!");
+						} else if (postAttackMessage == 2) {
+							System.out.println("\nCHARLOCK: Seems like you’ve taken a dueling lesson! But you’re still no match for me!");
+						}
+						
+					} else if (battle.getCharlockHP() <= 0) {
+						exit = true;
+						charlockLost = true;
+					}
+				}
+				
+				
+			}
+			
+			if(charlockLost) {
+				System.out.println("\nCHARLOCK: Your magic must be very powerful, Magi, for you have bested me in a duel. As a reward, you have received 2500 gold.\n"
+								+"Now go and tell the people of the Realm that you have vanquished the mighty Charlock! I will harm them no longer.");
+				enterCode();
+				gold += 2500;
+			} else {
+				System.out.println("\nCHARLOCK: I told you you wouldn't be able to defeat me, Magi!");
+				System.out.println("\nSorry, Magi. You'll have to try again later.");
+			}
+			
+			rune = 0;
+			
+			System.out.println("Saving progress, please wait...");
+			saveProgress();
+			
+		}
+		
+		return current;
+	}
+	/*
+	 * Pre: none
+	 * Post: code for Charlock’s cave generated
+	 * Description: generates the four-letter code to get into Charlock’s cave
+	 */
+	public static void generateCharlockCode() {
+		Random rand = new Random();
+		int character;
+		
+		for(int i=0; i<4; i++) {
+			
+			character = rand.nextInt(26) + 65;
+			
+			charlockCode += (char)character;
+			
+		}
+		
+	}
+	/*
+	 * Pre: input containing the scanner
+	 * Post: Charlock’s attack has (hopefully) been defended against
+	 * Description: Charlock attacks and user has been given opportunity to protect themselves
+	 */
+	public static void charlockAttack(Scanner input) {
+		int runeChoice = 0;
+		
+		//charlock attacks
+		System.out.println("\nCharlock rears his head, getting ready to blast you with fire. Quick, Magi, do something!");
+		System.out.print("(press enter)");
+		enterCode();
+		
+		//user picks a rune to defend themselves with
+		do {
+				
+			System.out.println("\nPICK YOUR RUNE");
+			printRunes();
+			runeChoice = input.nextInt();
+				
+		} while (runeChoice > 4 || runeChoice < 1);
+			
+		if(runeChoice == 4) {
+			//if they chose protection
+			
+			if (topperLength != 0 && toppers[0].getModifier() == 1) {
+				battle.charlockAttack(true, toppers[0].getMultiplier());
+			} else {
+				battle.charlockAttack(true, 1);
+			}
+			
+			System.out.println("\nYour Rune of Protection cut Charlock's attack in half!!!");
+			
+		} else {
+			//if they chose anything else
+			
+			if (topperLength != 0 && toppers[0].getModifier() == 1) {
+				battle.charlockAttack(false, toppers[0].getMultiplier());
+			} else {
+				battle.charlockAttack(false, 1);
+			}
+			System.out.println("\nOh, no! You didn't protect yourself, and you felt the full force of Charlock's attack.");
+		}
+	}
+	/*
+	 * Pre: input containing the scanner
+	 * Post: Charlock is (hopefully) frozen
+	 * Description: user can pick which Rune they want to cast after being told Charlock needs to be still
+	 */
+	public static boolean freezeCharlock(Scanner input) {
+		int runeChoice;
+		boolean frozen;
+		
+		//tells user that Charlock needs to stay still (*cough* freeze rune *cough*)
+		System.out.println("\nThere's a weak spot on Charlock's side, Magi! But he won't sit still enough for you to hit it!");
+		System.out.print("(press enter)");
+		enterCode();
+		
+		//user picks a rune use
+		do {
+						
+			System.out.println("\nPICK YOUR RUNE");
+			printRunes();
+			runeChoice = input.nextInt();
+						
+		} while (runeChoice > 4 || runeChoice < 1);
+					
+		if(runeChoice == 2) {
+			//if they chose freeze 
+			frozen = true;
+			System.out.println("\nGood job, Magi! Your Freeze Rune froze Charlock!");
+			
+					
+		} else {
+			//if they choose anything else
+			frozen = false;
+			System.out.println("\nOh no! You didn't use the right Rune!");
+		}
+		
+		return frozen;
+		
+	}
+	/*
+	 * Pre: input containing the scanner, boolean containing whether Charlock was frozen or not
+	 * Post: user has (hopefully) attacked Charlock
+	 * Description: allows user to attack Charlock if he is frozen and they pick the right Rune
+	 */
+	public static boolean userAttack(Scanner input, boolean frozen) {
+		int runeChoice;
+		boolean attacked;
+		
+		if(frozen) {
+			System.out.println("Ice Arrows are the only thing that can break the ice! Attack now, Magi!");
+		} else {
+			System.out.println("Alright, Magi, try attacking Charlock! You have arrows, go!");
+		}
+		
+		System.out.print("(press enter)");
+		enterCode();
+		
+		//user picks a rune use
+		do {
+								
+			System.out.println("\nPICK YOUR RUNE");
+			printRunes();
+			runeChoice = input.nextInt();
+								
+		} while (runeChoice > 4 || runeChoice < 1);
+		
+		if (!frozen && runeChoice == 3) {
+			//if they try to attack without him being frozen
+			System.out.println("\nCHARLOCK: Foolish Magi! Don't you know you can't hit me while I'm moving?.");
+			attacked = false;
+			System.out.print("(press enter)");
+			enterCode();
+		} else if (frozen && runeChoice == 3) {
+			//if they try to attack with frozen
+			System.out.println("\nGood job, Magi! Your attack weakened Charlock!");
+			attacked = true;
+			
+			if(topperLength != 0 && toppers[0].getModifier() == 2) {
+				battle.userAttack(toppers[0].getMultiplier());
+			} else {
+				battle.userAttack(1);
+			}
+			
+			System.out.print("(press enter)");
+			enterCode();
+			
+		} else {
+			//if they choose anything else
+			System.out.println("\nCHARLOCK: Foolish Magi! Don't you know that that's the wrong Rune?");
+			attacked = false;
+			System.out.print("(press enter)");
+			enterCode();
+		}
+			
+		return attacked;
+		 
+	}
+	/*
+	 * Pre: none
+	 * Post: health of Charlock and user printed
+	 * Description: prints the health of Charlock and the user
+	 */
+	public static void printHealth() {
+		
+		System.out.println("\nYOU: " + battle.getUserHP() + "HP\tCHARLOCK: " + battle.getCharlockHP() + "HP");
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: none
+	 * Description: starts the Quest of the user’s choice
+	 */
+	public static void runeStart(int first, Scanner input) {
+		int choice = 0;
+		
+		if (first == 1) {
+			
+			//tells the user if they were in the middle of a Rune when they logged out
+			System.out.println("\nYou are currently working on the " + runeName() + "\n");
+			
+			//resets the artifact queues to the correct artifactNum
+			for(int i=0; i<artifactNum-1; i++) {
+				if (rune == 1) {
+					portal.dequeue();
+				} else if (rune == 2) {
+					freeze.dequeue();
+				} else if (rune == 3) {
+					ice.dequeue();
+				} else if (rune == 4) {
+					protection.dequeue();
+				}
+			}
+			
+			//prints the clue for the current artifact
+			getNewClue(input);
+			
+		} else if(rune == 0) {
+			
+			do {
+				
+				//asks user to pick a quest if they aren't already on one
+				System.out.println("\nRUNE QUEST SELECTION");
+				printRunes();
+				choice = input.nextInt();
+				
+			} while (choice > 4 || choice < 1);
+			
+			rune = choice;
+			artifactNum = 1;
+			
+			System.out.println("\n-------------------------------------------------------------------------------------"
+					+ "----------------------------------------------------------\n");
+			
+			//general introduction to the quest
+			System.out.println(runeName().toUpperCase() + " QUEST");
+			
+			System.out.println("\nIn order to get the " + runeName() + ", the Ancient Book of Wisdom says: ");
+			
+			if(rune == 1) {
+				//prints general clue for the Portal Rune
+				System.out.println(portal.getGeneralClue());
+			} else if (rune == 2) {
+				//prints general clue for the Freeze Rune
+				System.out.println(freeze.getGeneralClue());
+			} else if (rune == 3) {
+				//prints general clue for the Ice Arrow Rune
+				System.out.println(ice.getGeneralClue());
+			} else if (rune == 4) {
+				//prints general clue for the Rune of Protection
+				System.out.println(protection.getGeneralClue());
+			}
+			
+			//makes sure the user reads the general clue
+			System.out.print("\t(press enter)");
+			enterCode();
+			
+			//tells the user how many artifacts there are on the quest
+			System.out.print("There are ");
+			
+			if(rune == 4) {
+				System.out.print("FOUR (4)");
+			} else {
+				System.out.print("FIVE (5)");
+			}
+			
+			System.out.print(" Artifacts for this quest. ");
+			
+			//prints the clue for Artifact 1
+			getNewClue(input);
+			
+		} else {
+			
+			//tells the user which rune they are working on
+			System.out.println("\nYou are already working on the " + runeName());
+			
+		}
+		
+	}
+	/*
+	 * Pre: none
+	 * Post: int current containing the current position
+	 * Description: grants the user the rune they just completed
+	 */
+	public static int runeFinish(Scanner input) {
+		
+		//tells user which rune they got
+		System.out.print("For your efforts, I grant you ");
+		
+		if(rune == 1) {
+			System.out.print("THE PORTAL RUNE. ");
+			runeCount[0]++;
+		} else if (rune == 2) {
+			System.out.print("THE FREEZING RUNE. ");
+			runeCount[1]++;
+		} else if (rune == 3) {
+			System.out.print("THE ICE ARROW RUNE. ");
+			runeCount[2]++;
+		} else if (rune == 4) {
+			System.out.print(" THE RUNE OF PROTECTION. ");
+			runeCount[3]++;
+		}
+		
+		System.out.print("Congratulations, Magi!");
+		
+		rune = 0;
+		artifactNum = 0;
+		System.out.print("(press enter)");
+		enterCode();
+		
+		System.out.println("\nSaving progress, please wait...");
+		saveProgress();
+		
+		System.out.println("-------------------------------------------------------------------------------------"
+				+ "----------------------------------------------------------");
+		
+		//sends them back to the Quest Stones
+		return 0;
+		
+	}
+	/*
+	 * Pre: none
+	 * Post: printed clue
+	 * Description: dequeues the next clue from the appropriate queue
+	 */
+	public static void getNewClue(Scanner input) {
+		
+		System.out.println("The clue for Artifact " + artifactNum + " is: ");
+		
+		//gives user the clue for the current Artifact for the rune they are working on
+		if (rune == 1) {
+			System.out.println(portal.dequeue());
+		} else if (rune == 2) {
+			System.out.println(freeze.dequeue());
+		} else if (rune == 3) {
+			System.out.println(ice.dequeue());
+		} else if (rune == 4) {
+			System.out.println(protection.dequeue());
+		}
+		
+		//makes sure the user reads the clue
+		System.out.println("\t(press enter)");
+		enterCode();
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: runes printed
+	 * Description: prints runes with numbers next to them as a menu
+	 */
+	public static void printRunes() {
+		
+		//prints the runes
+		System.out.println("[1] Portal Rune\n[2] Freeze Rune\n[3] Ice Arrow Rune\n[4] Rune of Protection");
+		System.out.print("Your choice: ");
+		
+	}
+	/*
+	 * Pre: none
+	 * Post: String containing the name of the current Rune
+	 * Description: returns the name of the current Rune
+	 */
+	public static String runeName() {
+		String runeName = "";
+		
+		//returns the name of the Rune the user is currently working on
+		if(rune == 1) {
+			runeName = "Portal Rune";
+		} else if(rune == 2) {
+			runeName = "Freeze Rune";
+		} else if (rune == 3) {
+			runeName = "Ice Arrow Rune";
+		} else if (rune == 4) {
+			runeName = "Rune of Protection";
+		} else {
+			runeName = "none";
+		}
+		
+		return runeName;
+	}
+	/*
+	 * Pre: none
+	 * Post: user has pressed enter
+	 * Description: requires the user to press enter before continuing
+	 */
+	public static void enterCode() {
+		String next;
+		Scanner input = new Scanner(System.in);
+		boolean cont = false;
+		
+		//User needs to hit the enter key to continue
+		do {
+			next = input.nextLine();
+			if (next.isEmpty()) {
+				cont = true;
+			}
+		} while (cont == false);
+		cont = false;
+	}
+	
+}

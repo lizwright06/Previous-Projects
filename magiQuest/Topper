@@ -1,0 +1,98 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: June 7, 2022
+ * Date Finished: June 15, 2022
+ * Description: information about a topper
+ */
+
+public class Topper {
+	
+	String name;
+	int modifier;
+	Double multiplier;
+	static int price;
+	boolean equipped;
+	
+	//modified code: 1=protection, 2=attack, 3=extra health
+	//multiplier code: protection = 0.85 (15% less), attack = 1.15 (15% increase), health +100 hp
+	
+	/*
+	 * Pre: none
+	 * Post: variables initialized
+	 * Description: constructor
+	 */
+	public Topper() {
+		//constructor
+		name = "";
+		modifier = 0;
+		multiplier = 0.0;
+		price = 400;
+		equipped = false;
+	}
+	/*
+	 * Pre: n containing the name, mod containing the modifier, 
+	 *      mul containing the multiplier, equip containing the equipped status
+	 * Post: variables initialized
+	 * Description: constructor
+	 */
+	public Topper(String n, int mod, Double mul, boolean equip) {
+		//overloaded constructor
+		name = n;
+		modifier = mod;
+		multiplier = mul;
+		price = 400;
+		equipped = equip;
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: String containing the name
+	 * Description: returns name
+	 */
+	public String getName() {
+		return name;
+	}
+	/*
+	 * Pre: none
+	 * Post: int containing the modifier
+	 * Description: returns modifier
+	 */
+	public int getModifier() {
+		return modifier;
+	}
+	/*
+	 * Pre: none
+	 * Post: double containing the multiplier
+	 * Description: returns multiplier
+	 */
+	public Double getMultiplier() {
+		return multiplier;
+	}
+	/*
+	 * Pre: none
+	 * Post: int containing the price
+	 * Description: returns price
+	 */
+	public int getPrice() {
+		return price;
+	}
+	/*
+	 * Pre: none
+	 * Post: boolean containing the equipped status
+	 * Description: returns equipped status
+	 */
+	public boolean getEquipped() {
+		return equipped;
+	}
+	
+	/*
+	 * Pre: equip containing the new equip status
+	 * Post: equip set to equipped
+	 * Description: changed equip status
+	 */
+	public void setEquipped(boolean equip) {
+		equipped = equip;
+	}
+	
+	
+}

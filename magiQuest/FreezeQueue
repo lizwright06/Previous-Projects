@@ -1,0 +1,92 @@
+/*
+ * Name: Elizabeth Wright
+ * Date Started: June 1, 2022
+ * Date Finished: June 15, 2022
+ * Description: Holds clues for the Freeze Portal Rune quest
+ */
+
+public class FreezeQueue extends Queue {
+	
+	/*
+	 * Pre: none
+	 * Post: variables initialized
+	 * Description: constructors
+	 */
+	public FreezeQueue() {
+		//initializes variables
+		super(-1, -1, 5, new String[5]);
+		clues = new String[5];
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: queue is initialized
+	 * Description: enqueues all the clues
+	 */
+	public void initialEnqueue() {
+		
+		//enqueues the clue for Artifact 1
+		enqueue("\n\tOne if by land, two if by sea\n" + 
+				"\ttrust find a lighter to light magically.\n" + 
+				"\tThe top of the Hall\n" + 
+				"\twhere the lanterns all loom,\n" + 
+				"\tyou're a bright Magi, you light up a room!");
+		
+		//enqueues the clue for Artifact 2
+		enqueue("\n\tI think that I shall never see\n" + 
+				"\ta thing as strange as a talking tree!\n" + 
+				"\tIt's at twenty-two in the Artifact Hall,\n" + 
+				"\tnow travel there quickly,\n" + 
+				"\tas you know you should!");
+		
+		//enqueues the clue for Artifact 3
+		enqueue("\n\tGo near the entrance\n" + 
+				"\tto the Artifacts and look\n" + 
+				"\tIt's here you'll find\n" + 
+				"\tthe Freezing Book.");
+		
+		//enqueues the clue for Artifact 4
+		enqueue("\n\tIt's back down the hall\n" + 
+				"\tthat this painting is found.\n" + 
+				"\tA portrait of fairies performing\n" + 
+				"\ton the ground and in the round.");
+		
+		//enqueues the clue for Artifact 5
+		enqueue("\n\tYou have the tree, book and lantern, the old painting too\n" + 
+				"\tThe rare Freezing Rune is waiting for you.\n" + 
+				"\tThe Hall of Artifacts holds the Old Man in the Stump,\n" + 
+				"\tapproach him with caution; he's kind of a grump!");
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: the general clue for the Rune
+	 * Description: returns the general clue
+	 */
+	public String getGeneralClue() {
+		
+		//returns general clue
+		return "\n\tAt the top of the Hall,\n" + 
+				"\ta lantern make glow.\n" + 
+				"\tAlong the bottom a talking\n" + 
+				"\ttree you'll come to know,\n" + 
+				"\tBack to the top,\n" + 
+				"\ta Book you will find,\n" + 
+				"\tAnd a painting of fairies\n" + 
+				"\twill be yours in time.";
+		
+	}
+	
+	/*
+	 * Pre: none
+	 * Post: string containing the data piece
+	 * Description: calls on super dequeue
+	 */
+	public String dequeue() {
+		//calls on super dequeue
+		return super.dequeue();
+	}
+	
+}
